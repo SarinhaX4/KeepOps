@@ -61,9 +61,6 @@ export default function LoginScreen() {
               resizeMode="contain"
               accessibilityLabel="KeepOps"
             />
-            <Text style={styles.slogan}>
-              Keep the context. <Text style={styles.sloganAccent}>Keep operations moving.</Text>
-            </Text>
           </View>
 
           <View style={styles.form}>
@@ -128,9 +125,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: spacing.xxl, gap: spacing.xxl, flexGrow: 1, justifyContent: 'center' },
   brand: { alignItems: 'center', gap: spacing.md },
-  logo: { width: 240, height: 62 },
-  slogan: { ...typography.bodySmall, color: colors.text, textAlign: 'center' },
-  sloganAccent: { color: colors.brandPrimaryText },
+  logo: { width: 280, height: 72 },
   form: { gap: spacing.lg },
   error: { fontFamily: fonts.medium, fontSize: 13, color: colors.badText },
   demo: {
