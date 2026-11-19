@@ -63,3 +63,61 @@ export function initials(fullName: string): string {
   const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : '';
   return `${first}${last}`.toUpperCase();
 }
+
+const MONTHS = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+] as const;
+const WEEKDAYS_LONG = [
+  'Domingo',
+  'Segunda',
+  'Terça',
+  'Quarta',
+  'Quinta',
+  'Sexta',
+  'Sábado',
+] as const;
+
+/** "Quinta, 19 de novembro" (São Paulo). */
+export function formatLongDate(date: Date): string {
+  const s = toSpWallClock(date);
+  return `${WEEKDAYS_LONG[s.getDay()]}, ${s.getDate()} de ${MONTHS[s.getMonth()]}`;
+}
+
+/** "Bom dia" / "Boa tarde" / "Boa noite" by São Paulo hour. */
+export function greeting(date: Date): string {
+  const h = toSpWallClock(date).getHours();
+  if (h >= 5 && h < 12) return 'Bom dia';
+  if (h >= 12 && h < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
+/** Elapsed time as "02:14:37". */
+export function formatElapsed(fromIso: string, now: Date): string {
+  const total = Math.max(0, Math.floor((now.getTime() - new Date(fromIso).getTime()) / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return [h, m, s].map((n) => String(n).padStart(2, '0')).join(':');
+}
+
+/** Minutes since an instant, for "18 min" badges. */
+export function minutesSince(fromIso: string, now: Date = new Date()): number {
+  return Math.max(0, Math.floor((now.getTime() - new Date(fromIso).getTime()) / 60_000));
+}
+
+/** "18 min" or "2 h 05". */
+export function formatMinutes(min: number): string {
+  if (min < 60) return `${min} min`;
+  return `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')}`;
+}

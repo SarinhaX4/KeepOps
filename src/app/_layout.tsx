@@ -35,6 +35,7 @@ function RootNavigator() {
         headerTintColor: colors.text,
         headerTitleStyle: { fontFamily: fonts.semibold, fontSize: 16 },
         headerShadowVisible: false,
+        headerBackButtonDisplayMode: 'minimal',
       }}
     >
       <Stack.Protected guard={signedIn}>
@@ -42,6 +43,11 @@ function RootNavigator() {
         <Stack.Screen
           name="changes/new"
           options={{ headerShown: true, title: 'Nova GMUD', presentation: 'card' }}
+        />
+        <Stack.Screen name="changes/[id]/index" options={{ headerShown: true, title: 'GMUD' }} />
+        <Stack.Screen
+          name="applications/index"
+          options={{ headerShown: true, title: 'Aplicações' }}
         />
       </Stack.Protected>
       <Stack.Protected guard={!signedIn}>

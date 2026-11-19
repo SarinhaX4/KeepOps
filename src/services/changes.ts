@@ -71,3 +71,43 @@ export async function createChange(input: NewChangeInput, userId: string, teamId
 
   return change;
 }
+
+export type ChangeDetail = Tables<'changes'> & {
+  apps: (Pick<Tables<'applications'>, 'id' | 'name' | 'short_name'> & {
+    steps: Pick<
+      Tables<'validations'>,
+      'id' | 'step_title' | 'position' | 'result' | 'note' | 'performed_at'
+    >[];
+  })[];
+};
+
+export async function getChange(id: string): Promise<ChangeDetail> {
+  const [changeRes, valRes] = await Promise.all([
+    supabase
+      .from('changes')
+      .select('*, change_applications(applications(id, name, short_name))')
+      .eq('id', id)
+      .single(),
+    supabase
+      .from('validations')
+      .select('id, application_id, step_title, position, result, note, performed_at')
+      .eq('change_id', id)
+      .order('position'),
+  ]);
+  if (changeRes.error) throw new Error(`GMUD não encontrada: ${changeRes.error.message}`);
+  if (valRes.error) throw new Error(`Erro ao carregar checklist: ${valRes.error.message}`);
+
+  const { change_applications, ...change } = changeRes.data;
+  return {
+    ...change,
+    apps: change_applications
+      .map((ca) => ca.applications)
+      .filter((a): a is NonNullable<typeof a> => a !== null)
+      .map((a) => ({
+        ...a,
+        steps: valRes.data
+          .filter((v) => v.application_id === a.id)
+          .map(({ application_id: _omit, ...step }) => step),
+      })),
+  };
+}

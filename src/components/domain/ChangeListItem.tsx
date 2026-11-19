@@ -1,14 +1,20 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { Card } from '@/components/ui/Card';
+
 import type { ChangeListItem as Change } from '@/services/changes';
 import { colors, fonts, radius, spacing, typography } from '@/theme';
 import { formatWindow } from '@/utils/format';
 
 import { ChangeStatusBadge } from './StatusBadge';
 
-export function ChangeListItem({ change }: { change: Change }) {
+export function ChangeListItem({ change, onPress }: { change: Change; onPress: () => void }) {
   return (
-    <View style={styles.card}>
+    <Card
+      style={styles.card}
+      onPress={onPress}
+      accessibilityLabel={`${change.change_number}: ${change.title}`}
+    >
       <View style={styles.top}>
         <Text style={styles.number}>{change.change_number}</Text>
         <ChangeStatusBadge status={change.status} />
@@ -26,19 +32,12 @@ export function ChangeListItem({ change }: { change: Change }) {
           ))}
         </View>
       ) : null}
-    </View>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.card,
-    padding: spacing.lg,
-    gap: spacing.sm,
-  },
+  card: { gap: spacing.sm },
   top: {
     flexDirection: 'row',
     alignItems: 'center',

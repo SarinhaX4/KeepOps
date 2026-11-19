@@ -1,24 +1,45 @@
-import { router } from 'expo-router';
-import { ClipboardCheck, Plus } from 'lucide-react-native';
-import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { ClipboardCheck, Plus, X } from 'lucide-react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChangeListItem } from '@/components/domain/ChangeListItem';
+import { changeStatusTone } from '@/components/domain/StatusBadge';
 import { FAB } from '@/components/ui/FAB';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/StateViews';
 import { useChanges } from '@/hooks/useChanges';
-import { colors, spacing, typography } from '@/theme';
+import type { ChangeStatus } from '@/services/changes';
+import { colors, fonts, hitTarget, radius, spacing, typography } from '@/theme';
 
 export default function ChangesScreen() {
   const { data, isPending, isError, error, refetch, isRefetching } = useChanges();
+  const { status } = useLocalSearchParams<{ status?: string }>();
   const goToNew = () => router.push('/changes/new');
+
+  // Optional filter coming from the home counters (?status=a,b).
+  const statusFilter = (status ? status.split(',') : []).filter(
+    (s): s is ChangeStatus => s in changeStatusTone,
+  );
+  const items = statusFilter.length ? data?.filter((c) => statusFilter.includes(c.status)) : data;
+  const filterLabel = statusFilter.map((s) => changeStatusTone[s].label).join(' + ');
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text style={styles.title}>GMUDs</Text>
-        {data ? <Text style={styles.count}>{data.length} no total</Text> : null}
+        {items ? <Text style={styles.count}>{items.length} GMUDs</Text> : null}
       </View>
+      {statusFilter.length ? (
+        <Pressable
+          onPress={() => router.setParams({ status: undefined })}
+          accessibilityRole="button"
+          accessibilityLabel={`Remover filtro ${filterLabel}`}
+          style={styles.filter}
+        >
+          <Text style={styles.filterText}>Filtro: {filterLabel}</Text>
+          <X size={14} color={colors.brandPrimaryText} strokeWidth={2.2} />
+        </Pressable>
+      ) : null}
 
       {isPending ? (
         <View style={styles.list}>
@@ -30,9 +51,14 @@ export default function ChangesScreen() {
         <ErrorState message={error.message} onRetry={() => void refetch()} />
       ) : (
         <FlatList
-          data={data}
+          data={items}
           keyExtractor={(c) => c.id}
-          renderItem={({ item }) => <ChangeListItem change={item} />}
+          renderItem={({ item }) => (
+            <ChangeListItem
+              change={item}
+              onPress={() => router.push({ pathname: '/changes/[id]', params: { id: item.id } })}
+            />
+          )}
           contentContainerStyle={styles.list}
           refreshControl={
             <RefreshControl
@@ -45,7 +71,9 @@ export default function ChangesScreen() {
           ListEmptyComponent={
             <EmptyState
               icon={ClipboardCheck}
-              title="Nenhuma GMUD cadastrada"
+              title={
+                statusFilter.length ? 'Nenhuma GMUD com este status' : 'Nenhuma GMUD cadastrada'
+              }
               description="Cadastre as mudanças da janela para começar a validar."
               actionLabel="Nova GMUD"
               onAction={goToNew}
@@ -71,6 +99,18 @@ const styles = StyleSheet.create({
   },
   title: { ...typography.display, color: colors.text },
   count: { ...typography.meta, color: colors.muted },
+  filter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.sm,
+    minHeight: hitTarget - 8,
+    marginHorizontal: spacing.xl,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.chip,
+    backgroundColor: colors.brandPrimarySoft,
+  },
+  filterText: { fontFamily: fonts.medium, fontSize: 13, color: colors.brandPrimaryText },
   // Bottom padding keeps the last card above the FAB.
   list: { padding: spacing.xl, paddingBottom: 96, gap: spacing.md },
 });

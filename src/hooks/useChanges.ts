@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createChange, listChanges, type NewChangeInput } from '@/services/changes';
+import { createChange, getChange, listChanges, type NewChangeInput } from '@/services/changes';
 
 import { useProfile } from './useProfile';
 
@@ -21,4 +21,8 @@ export function useCreateChange() {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: changesKey }),
   });
+}
+
+export function useChange(id: string) {
+  return useQuery({ queryKey: ['change', id], queryFn: () => getChange(id) });
 }
