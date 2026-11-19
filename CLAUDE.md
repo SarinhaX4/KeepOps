@@ -13,5 +13,10 @@ Leia nesta ordem antes de qualquer trabalho:
 - Foto de evidência = P2. Usuários demo criados por script Node com service key. Health check com URL reserva.
 - Cores sempre via `@/theme` — nunca hex solto nas telas. Aqua = marca/ação; verde `ok` = aprovado.
 
+## Supabase
+- O ambiente do Claude NÃO alcança *.supabase.co. Migrations são aplicadas pela Sara no SQL Editor; seed roda na máquina dela (`npm run seed`, lê `.env.local`).
+- `src/types/database.ts` é escrito à mão no formato do `supabase gen types` — mantenha em sincronia com `supabase/migrations/`.
+- Chaves: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_KEY` (publishable) no app; `SUPABASE_SECRET_KEY` só no seed. Nunca commitar `.env.local`.
+
 ## Antes de dizer "pronto"
 `npm run check` (typecheck + lint) sem erros.

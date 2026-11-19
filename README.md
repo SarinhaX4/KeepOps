@@ -1,56 +1,37 @@
-# Welcome to your Expo app 👋
+# KeepOps
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Keep the context. Keep operations moving.**
 
-## Get started
+Caderno de validação digital do plantonista que acompanha mudanças de infraestrutura (GMUDs) fora do horário comercial, com passagem de plantão e pendências para a equipe da semana.
 
-1. Install dependencies
+> Projeto acadêmico (AT2-N2 · React Native). Todos os dados são **fictícios** e demonstrativos.
 
-   ```bash
-   npm install
-   ```
+## Stack
+Expo SDK 58 · React Native · TypeScript (strict) · Expo Router · Supabase (Postgres, Auth, RLS) · TanStack Query · Zustand · react-hook-form + zod · date-fns
 
-2. Start the app
+## Como rodar
 
-   ```bash
-   npx expo start
-   ```
+1. `npm install`
+2. Copie `.env.example` para `.env.local` e preencha com as chaves do seu projeto Supabase.
+3. No Supabase, abra **SQL Editor** e execute `supabase/migrations/20261119000000_init.sql`.
+4. `npm run seed` — cria a equipe demo, os usuários e os dados de exemplo.
+5. `npx expo start` e abra no Expo Go.
 
-In the output, you'll find options to open the app in a
+### Usuários demonstrativos
+| Usuário | E-mail | Papel |
+|---|---|---|
+| Ana Souza | ana.souza@example.com | Plantonista |
+| João Lima | joao.lima@example.com | Plantonista |
+| Marina Costa | marina.costa@example.com | Equipe da semana |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Senha de todos: `KeepOps#Demo2026` (ambiente demonstrativo).
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Scripts
+- `npm run check` — typecheck + lint
+- `npm run seed` — recria os dados demonstrativos
+- `npm run format` — Prettier
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Documentação
+- [Especificação](docs/SPEC.md)
+- [Identidade visual](docs/IDENTIDADE_VISUAL.md)
+- [Progresso](docs/PROGRESSO.md)
