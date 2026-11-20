@@ -4,6 +4,11 @@
 
 <p align="center"><b>Keep the context. Keep operations moving.</b></p>
 
+<p align="center">
+  <a href="https://sarinhax4.github.io/KeepOps/"><b>🔗 Conheça o projeto completo no site → sarinhax4.github.io/KeepOps</b></a><br/>
+  <sub>a dor, as telas do app, como foi construído e os aprendizados</sub>
+</p>
+
 O **KeepOps** é o caderno de validação digital do plantonista que acompanha mudanças de infraestrutura (GMUDs) fora do horário comercial — madrugadas e fins de semana — e garante que o próximo turno e a equipe da semana assumam o que ficou pendente.
 
 > Projeto acadêmico (AT2-N2 · React Native · UCB) e de portfólio SRE/DevOps. **Todos os dados são fictícios e demonstrativos.** O KeepOps não integra com ServiceNow/Jira: números de CHG/INC são apenas texto.
