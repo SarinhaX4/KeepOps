@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KeepOps — estudo de caso · Sara Oliveira</title>
+<meta name="description" content="App mobile para plantonistas que validam mudanças de infraestrutura: passagem de plantão gerada automaticamente e pendências que atravessam turnos. Projeto de Sara Oliveira.">
+<meta name="author" content="Sara Cristina Barros de Oliveira">
+<meta property="og:type" content="website">
+<meta property="og:title" content="KeepOps — o plantão termina, o contexto fica">
+<meta property="og:description" content="Estudo de caso: da dor real do plantão de madrugada a um app em React Native + Supabase.">
+<meta property="og:image" content="https://sarinhax4.github.io/KeepOps/assets/og.png">
+<meta property="og:url" content="https://sarinhax4.github.io/KeepOps/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #040607;
+    --surface: #0A0F11;
+    --surface-2: #121A1D;
+    --line: rgba(237, 239, 238, 0.08);
+    --line-hi: rgba(237, 239, 238, 0.16);
+    --text: #EDEFEE;
+    --muted: #9BA3A0;
+    --dim: #78827E;
+    --aqua: #10BFA5;
+    --aqua-text: #2FD3CB;
+    --cyan: #22C3EE;
+    --ok: #7EE8BC;
+    --warn: #FCD34D;
+    --bad: #FDA4AF;
+    --info: #8AD7FA;
+    --sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--aqua-text); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 6px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  .prose { max-width: 66ch; }
+
+  /* Header */
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 24px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
+  .brand img { width: 30px; height: 30px; }
+  .brand .word span { color: var(--aqua); }
+  .top nav { display: flex; gap: 22px; font-size: 15px; }
+  .top nav a { color: var(--muted); text-decoration: none; }
+  .top nav a:hover { color: var(--text); }
+
+  /* Hero: the handover note is the one bold thing on the page */
+  .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; padding: 56px 0 96px; }
+  .hero h1 { font-size: clamp(40px, 6vw, 68px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 700; margin: 0 0 24px; }
+  .hero p.lead { font-size: 20px; line-height: 1.5; color: var(--muted); margin: 0 0 32px; max-width: 34ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 20px; border-radius: 12px; font: 600 15px var(--sans); text-decoration: none; border: 1px solid var(--line-hi); color: var(--text); }
+  .btn.primary { background: var(--aqua); color: #03241F; border-color: var(--aqua); }
+  .btn:hover { filter: brightness(1.08); }
+  .byline { margin-top: 28px; font-size: 14px; color: var(--dim); }
+
+  .note { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px 22px 18px; font: 400 13.5px/1.7 var(--mono); color: var(--text); box-shadow: 0 0 0 1px rgba(16,191,165,0.06), 0 30px 80px -40px rgba(34,195,238,0.35); }
+  .note-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line); font-family: var(--sans); }
+  .note-head b { font-size: 15px; }
+  .note-head small { color: var(--dim); font: 400 12px var(--mono); }
+  .note h4 { margin: 14px 0 4px; font: 600 13px var(--sans); color: var(--muted); }
+  .note ul { list-style: none; margin: 0; padding: 0; }
+  .note li { display: flex; justify-content: space-between; gap: 12px; }
+  .note .ok { color: var(--ok); } .note .bad { color: var(--bad); } .note .warn { color: var(--warn); } .note .info { color: var(--info); }
+  .note .sub { color: var(--dim); padding-left: 14px; }
+  .note-foot { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-family: var(--sans); font-size: 13px; color: var(--muted); }
+  .note-foot .ok { color: var(--ok); }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .note li, .note h4 { animation: rise .5s both; }
+  .note > :nth-child(n) { animation-delay: calc(var(--i, 0) * 90ms); }
+
+  /* Sections */
+  section { padding: 88px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(28px, 3.4vw, 38px); line-height: 1.15; letter-spacing: -0.025em; margin: 0 0 20px; font-weight: 650; max-width: 22ch; }
+  h3 { font-size: 19px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  p { margin: 0 0 16px; }
+  .muted { color: var(--muted); }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  .quote { font-size: 22px; line-height: 1.45; letter-spacing: -0.01em; border-left: 2px solid var(--aqua); padding-left: 20px; margin: 8px 0 0; }
+
+  .people { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 36px; }
+  .person { padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid currentColor; font-weight: 600; margin-bottom: 14px; }
+  .person p { color: var(--muted); font-size: 15.5px; margin: 0; }
+
+  .flows { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 36px; }
+  .flow { padding: 24px; border: 1px solid var(--line); border-radius: 16px; }
+  .flow ol { margin: 14px 0 0; padding-left: 20px; color: var(--muted); }
+  .flow li { margin-bottom: 6px; } .flow li::marker { color: var(--aqua-text); font-family: var(--mono); }
+
+  .shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 32px; }
+  .shots figure { margin: 0; }
+  .shots img { width: 100%; border-radius: 22px; border: 1px solid var(--line-hi); display: block; }
+  .shots figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; }
+
+  /* Process: a real sequence, so it is numbered */
+  .phases { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 40px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .phase { padding: 22px; border-right: 1px solid var(--line); }
+  .phase:last-child { border-right: 0; }
+  .phase h3 { color: var(--aqua-text); }
+  .phase ol { margin: 0; padding-left: 0; list-style: none; counter-reset: none; font-size: 15px; color: var(--muted); }
+  .phase li { padding: 6px 0; border-top: 1px solid var(--line); }
+  .phase li b { color: var(--text); font-weight: 500; }
+  .phase li .n { font: 400 12px var(--mono); color: var(--dim); margin-right: 8px; }
+
+  .arch { margin-top: 36px; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow-x: auto; }
+  .arch svg { width: 100%; min-width: 640px; height: auto; display: block; }
+  .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 48px; margin-top: 36px; }
+  .facts div { padding: 18px 0; border-top: 1px solid var(--line); }
+  .facts b { display: block; margin-bottom: 4px; }
+  .facts span { color: var(--muted); font-size: 15.5px; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 32px; font-size: 15.5px; }
+  th, td { text-align: left; padding: 14px 16px 14px 0; border-top: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--text); font-weight: 600; width: 30%; }
+  td { color: var(--muted); }
+
+  .next { columns: 2; column-gap: 48px; margin: 28px 0 0; padding-left: 20px; color: var(--muted); }
+  .next li { margin-bottom: 8px; break-inside: avoid; }
+
+  footer { border-top: 1px solid var(--line); padding: 48px 0 64px; color: var(--dim); font-size: 14px; }
+  footer .row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; align-items: center; }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 860px) {
+    .hero, .split, .flows, .facts { grid-template-columns: 1fr; }
+    .hero { padding-top: 24px; gap: 40px; }
+    .people { grid-template-columns: 1fr; }
+    .phases { grid-template-columns: 1fr 1fr; }
+    .phase:nth-child(2) { border-right: 0; }
+    .phase:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+    .next { columns: 1; }
+    .top nav { display: none; }
+  }
+  .note li > span:last-child { white-space: nowrap; }
+  @media (max-width: 520px) {
+    .note { font-size: 12px; padding: 18px 16px 14px; }
+    .note-head { flex-direction: column; gap: 2px; }
+    .note-foot { flex-direction: column; gap: 4px; }
+    .split { gap: 16px; }
+  }
+  @media (max-width: 520px) { .phases { grid-template-columns: 1fr; } .phase { border-right: 0; border-bottom: 1px solid var(--line); } body { font-size: 16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#" aria-label="KeepOps, início da página"><img src="assets/symbol.png" alt=""><span class="word">Keep<span>Ops</span></span></a>
+    <nav aria-label="Seções">
+      <a href="#dor">A dor</a>
+      <a href="#solucao">A solução</a>
+      <a href="#processo">Como construí</a>
+      <a href="#engenharia">Engenharia</a>
+      <a href="#aprendizados">Aprendizados</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>O plantão termina. O contexto fica.</h1>
+        <p class="lead">KeepOps é o caderno de validação do plantonista que acompanha mudanças de infraestrutura de madrugada e no fim de semana — e entrega ao próximo turno uma passagem que se escreve sozinha.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://github.com/SarinhaX4/KeepOps">Ver o código no GitHub</a>
+          <a class="btn" id="video-link" href="#" hidden>Assistir ao vídeo de 30 s</a>
+        </div>
+        <p class="byline">Projeto de Sara Oliveira · Engenharia de Software, UCB · React Native + Supabase</p>
+      </div>
+
+      <figure class="note" aria-label="Exemplo de passagem de plantão gerada pelo KeepOps" style="margin:0">
+        <div class="note-head"><b>Passagem de plantão</b><small>turno noturno · Ana Souza</small></div>
+        <h4 style="--i:1">GMUDs da janela</h4>
+        <ul>
+          <li style="--i:2"><span>CHG0012345 Atualização de Java</span><span class="bad">reprovada</span></li>
+          <li class="sub" style="--i:3"><span>API de Pagamentos · baseline 120 ms → HTTP 503</span></li>
+          <li style="--i:4"><span>CHG0012346 Patch no OHS</span><span class="ok">validada</span></li>
+          <li style="--i:5"><span>CHG0012347 Renovação de certificado</span><span class="info">agendada</span></li>
+        </ul>
+        <h4 style="--i:6">Ocorrências</h4>
+        <ul><li style="--i:7"><span>SEV2 INC0012345 · executor acionado</span><span class="warn">sem resposta</span></li></ul>
+        <h4 style="--i:8">Pendências para a equipe</h4>
+        <ul>
+          <li style="--i:9"><span>Revalidar a API após restart</span><span class="warn">sem responsável</span></li>
+          <li style="--i:10"><span>Reprocessar fila do barramento</span><span class="ok">com Marina</span></li>
+        </ul>
+        <div class="note-foot"><span>Gerada a partir dos registros do turno</span><span class="ok">recebida por João</span></div>
+      </figure>
+    </div>
+
+    <section id="dor">
+      <div class="split">
+        <div>
+          <h2>Nasceu de uma madrugada de plantão</h2>
+        </div>
+        <div class="prose">
+          <p>Trabalhei com sustentação de infraestrutura em ambiente financeiro: plantões noturnos, janelas de mudança, patching de servidores de aplicação. Mudanças em sistemas críticos acontecem quando ninguém está usando — de madrugada e no fim de semana.</p>
+          <p>Quem valida está sozinho. Espera o fornecedor liberar, testa cada aplicação à mão, aciona quem executou quando algo falha e anota tudo em chats e planilhas. No fim do turno, a passagem é uma mensagem. Na segunda-feira, a equipe reconstrói o fim de semana a partir de fragmentos.</p>
+          <p class="quote">Quais mudanças aconteceram, o que falhou, quem foi acionado e o que ficou para quem vem depois?</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="solucao">
+      <h2>Feito para três pessoas que nunca estão no mesmo turno</h2>
+      <p class="prose muted">O KeepOps não substitui ferramentas de ITSM: ele é de quem valida, não de quem executa. Números de mudança e de incidente entram como texto.</p>
+      <div class="people">
+        <div class="person"><div class="avatar" style="color:var(--aqua)">A</div><h3>Ana, plantonista</h3><p>Valida com uma mão, às 3h. Recebe o checklist pronto, roda o health check, abre a ocorrência do passo que falhou e encerra o turno sem reescrever nada.</p></div>
+        <div class="person"><div class="avatar" style="color:var(--cyan)">J</div><h3>João, próximo turno</h3><p>Entende o estado da operação em menos de um minuto e confirma que recebeu. As pendências abertas já aparecem no Início dele.</p></div>
+        <div class="person"><div class="avatar" style="color:#7DD3FC">M</div><h3>Marina, equipe da semana</h3><p>Na segunda, abre o resumo do fim de semana com todos os turnos numa tela e assume as pendências que sobraram.</p></div>
+      </div>
+      <div class="flows">
+        <div class="flow">
+          <h3>Turno a turno</h3>
+          <ol>
+            <li>O executor avisa e a Ana libera a GMUD para validação</li>
+            <li>Checklist da aplicação + health check antes × depois</li>
+            <li>Passo reprovado vira ocorrência; o acionamento fica registrado</li>
+            <li>A passagem é gerada dos registros e compartilhada</li>
+            <li>João confirma o recebimento</li>
+          </ol>
+        </div>
+        <div class="flow">
+          <h3>Fim de semana → equipe da semana</h3>
+          <ol>
+            <li>Vários turnos registram GMUDs no sábado e no domingo</li>
+            <li>Marina abre o resumo de sexta 19h a segunda 7h</li>
+            <li>Vê GMUDs por turno, ocorrências e acionamentos sem resposta</li>
+            <li>Assume uma pendência e conclui com uma nota</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="telas" hidden>
+      <h2>As telas</h2>
+      <div class="shots">
+        <figure><img src="screens/01-inicio.png" alt="Início com turno aberto, contadores da janela e pendências"><figcaption>Início com o turno em andamento</figcaption></figure>
+        <figure><img src="screens/02-validacao.png" alt="Validação da API com baseline de 120 ms e HTTP 503 depois da mudança"><figcaption>Health check antes × depois</figcaption></figure>
+        <figure><img src="screens/03-ocorrencia.png" alt="Ocorrência com linha do tempo e acionamento"><figcaption>Ocorrência e acionamento</figcaption></figure>
+        <figure><img src="screens/04-passagem.png" alt="Passagem de plantão gerada automaticamente"><figcaption>Passagem gerada sozinha</figcaption></figure>
+        <figure><img src="screens/05-resumo.png" alt="Resumo do fim de semana agrupado por turno"><figcaption>Resumo do fim de semana</figcaption></figure>
+        <figure><img src="screens/06-metricas.png" alt="Métricas de taxa de falha e MTTR"><figcaption>Taxa de falha e MTTR</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="processo">
+      <h2>Do problema ao app, na ordem em que um software nasce</h2>
+      <p class="prose muted">Cada etapa terminou com o app rodando no celular e um commit no GitHub. O fluxo inteiro funcionou de ponta a ponta primeiro; o polimento veio depois.</p>
+      <div class="phases">
+        <div class="phase"><h3>Descobrir</h3><ol>
+          <li><span class="n">01</span><b>Perceber a dor</b> vivida no plantão</li>
+          <li><span class="n">02</span><b>Definir o problema</b> em quatro perguntas</li>
+          <li><span class="n">03</span><b>Personas e jornadas</b></li>
+        </ol></div>
+        <div class="phase"><h3>Definir</h3><ol>
+          <li><span class="n">04</span><b>Requisitos</b> e critérios de aceite</li>
+          <li><span class="n">05</span><b>Escopo</b> P0/P1/P2 e plano de corte</li>
+          <li><span class="n">06</span><b>Cronograma</b> em etapas e riscos</li>
+          <li><span class="n">07</span><b>Stack</b> justificada item a item</li>
+        </ol></div>
+        <div class="phase"><h3>Construir</h3><ol>
+          <li><span class="n">08</span><b>Ambiente</b> do zero</li>
+          <li><span class="n">09</span><b>Arquitetura</b> em camadas</li>
+          <li><span class="n">10</span><b>Banco</b>, segurança e seed</li>
+          <li><span class="n">11</span><b>Marca</b> e design system</li>
+          <li><span class="n">12</span><b>Etapas</b> incrementais</li>
+          <li><span class="n">13</span><b>Testes</b> e validação</li>
+        </ol></div>
+        <div class="phase"><h3>Entregar</h3><ol>
+          <li><span class="n">14</span><b>Versionamento</b> e IA como par</li>
+          <li><span class="n">15</span><b>Diagnóstico</b> de problemas reais</li>
+          <li><span class="n">16</span><b>Segurança</b> e privacidade</li>
+          <li><span class="n">17</span><b>Vídeo</b>, apresentação e portfólio</li>
+        </ol></div>
+      </div>
+    </section>
+
+    <section id="engenharia">
+      <h2>Telas nunca falam direto com o banco</h2>
+      <p class="prose muted">Tela → hook → service → Supabase. Toda regra de negócio vive em funções puras, sem tela e sem banco — e são elas que os testes cobrem.</p>
+      <div class="arch">
+        <svg viewBox="0 0 760 330" role="img" aria-label="Arquitetura do KeepOps em camadas">
+          <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5B6B73"/></marker></defs>
+          <g fill="none" stroke="#5B6B73" stroke-width="1.25">
+            <path d="M380 70V96" marker-end="url(#ar)"/><path d="M330 152V170H195V188" marker-end="url(#ar)"/><path d="M430 152V170H570V188" marker-end="url(#ar)"/><path d="M195 244V264" marker-end="url(#ar)"/>
+          </g>
+          <g font-family="Geist, sans-serif">
+            <rect x="250" y="14" width="260" height="56" rx="10" fill="none" stroke="#5B6B73"/>
+            <text x="266" y="38" fill="#EDEFEE" font-size="15" font-weight="600">Telas (Expo Router)</text>
+            <text x="266" y="58" fill="#9BA3A0" font-size="12">o que o usuário vê e toca</text>
+            <rect x="250" y="96" width="260" height="56" rx="10" fill="none" stroke="#5B6B73"/>
+            <text x="266" y="120" fill="#EDEFEE" font-size="15" font-weight="600">Hooks (TanStack Query)</text>
+            <text x="266" y="140" fill="#9BA3A0" font-size="12">cache · estados de tela · otimista</text>
+            <rect x="60" y="188" width="270" height="56" rx="10" fill="none" stroke="#5B6B73"/>
+            <text x="76" y="212" fill="#EDEFEE" font-size="15" font-weight="600">Services</text>
+            <text x="76" y="232" fill="#9BA3A0" font-size="12">consultas ao Supabase</text>
+            <rect x="430" y="188" width="280" height="88" rx="10" fill="rgba(16,191,165,0.10)" stroke="#10BFA5" stroke-width="2"/>
+            <text x="446" y="212" fill="#EDEFEE" font-size="15" font-weight="600">Funções puras · 45 testes</text>
+            <text x="446" y="232" fill="#2FD3CB" font-size="12">buildHandover · buildPeriodSummary</text>
+            <text x="446" y="249" fill="#2FD3CB" font-size="12">metrics · suggestShiftKind</text>
+            <text x="446" y="266" fill="#2FD3CB" font-size="12">suggestConclusion · healthcheck</text>
+            <rect x="60" y="264" width="270" height="56" rx="10" fill="none" stroke="#5B6B73"/>
+            <text x="76" y="288" fill="#EDEFEE" font-size="15" font-weight="600">Supabase · Postgres</text>
+            <text x="76" y="308" fill="#9BA3A0" font-size="12">RLS por equipe · triggers · Auth</text>
+          </g>
+        </svg>
+      </div>
+      <div class="facts">
+        <div><b>Segurança no banco</b><span>Row Level Security em todas as tabelas: cada pessoa só vê a própria equipe, mesmo que o app tenha um bug.</span></div>
+        <div><b>Regras que o banco garante</b><span>Vincular uma aplicação cria o checklist; toda mudança de status entra no histórico; pendência só fecha com nota.</span></div>
+        <div><b>Passagem derivada, não digitada</b><span>Uma função monta a passagem a partir dos registros e congela um retrato ao encerrar o turno.</span></div>
+        <div><b>Health check de verdade</b><span>Requisição HTTP do celular com timeout de 8 s, latência medida e endereço reserva se o principal cair.</span></div>
+        <div><b>Métricas de SRE</b><span>Taxa de falha de mudanças e MTTR, separando semana de fim de semana (feriados incluídos).</span></div>
+        <div><b>Stack</b><span>Expo, React Native e TypeScript estrito · Supabase · TanStack Query · Zustand · react-hook-form + zod · Jest.</span></div>
+      </div>
+    </section>
+
+    <section id="aprendizados">
+      <h2>O que este projeto me ensinou</h2>
+      <table>
+        <tr><th>Produto</th><td>Transformar uma dor vivida em problema, proposta de valor e posicionamento — inclusive dizendo o que o app não é.</td></tr>
+        <tr><th>Requisitos</th><td>Personas, jornadas, requisitos funcionais e não funcionais, regras de negócio e critérios de aceite que viraram testes.</td></tr>
+        <tr><th>Gestão</th><td>Priorização P0/P1/P2, plano de corte escrito, etapas pequenas com critério de pronto, diário de decisões.</td></tr>
+        <tr><th>Arquitetura e banco</th><td>Camadas, funções puras, modelagem relacional, RLS, triggers, migrations e seed reproduzível.</td></tr>
+        <tr><th>Design</th><td>Marca, logo, paleta derivada da logo, design tokens, design system e acessibilidade (contraste, alvos de toque, leitor de tela).</td></tr>
+        <tr><th>Qualidade e DevOps</th><td>Typecheck, lint e testes num comando só; Git com um commit por etapa; ambiente documentado.</td></tr>
+        <tr><th>Troubleshooting</th><td>Ler o erro até a causa raiz: "preset não encontrado" era, na verdade, uma biblioteca do sistema faltando no Windows.</td></tr>
+        <tr><th>IA como par</th><td>A IA escreveu e testou o código; eu defini o produto, validei cada etapa no celular e tomei as decisões.</td></tr>
+      </table>
+    </section>
+
+    <section id="proximos">
+      <h2>O que vem depois</h2>
+      <ul class="next">
+        <li>Testes rodando no GitHub Actions a cada mudança</li>
+        <li>App instalável com EAS</li>
+        <li>Health checks agendados no servidor</li>
+        <li>Notificação para o próximo plantonista</li>
+        <li>Resumo do fim de semana automático às segundas</li>
+        <li>Foto de evidência e período personalizado</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap row">
+    <span>© 2026 Sara Cristina Barros de Oliveira · todos os direitos reservados · dados do app são fictícios</span>
+    <span><a href="https://github.com/SarinhaX4">GitHub</a> &nbsp; <a id="linkedin-link" href="#" hidden>LinkedIn</a></span>
+  </div>
+</footer>
+
+<script>
+  // Links the author fills in later; buttons stay hidden until they exist.
+  const LINKS = { video: '', linkedin: '' };
+  if (LINKS.video) { const a = document.getElementById('video-link'); a.href = LINKS.video; a.hidden = false; }
+  if (LINKS.linkedin) { const a = document.getElementById('linkedin-link'); a.href = LINKS.linkedin; a.hidden = false; }
+
+  // Show the "Telas" section only with the screenshots that exist.
+  const shots = [...document.querySelectorAll('#telas figure')];
+  let loaded = 0, settled = 0;
+  shots.forEach((fig) => {
+    const img = fig.querySelector('img');
+    const done = (ok) => {
+      settled++;
+      if (ok) { loaded++; document.getElementById('telas').hidden = false; } else { fig.remove(); }
+    };
+    if (img.complete) done(img.naturalWidth > 0);
+    else { img.addEventListener('load', () => done(true)); img.addEventListener('error', () => done(false)); }
+  });
+</script>
+</body>
+</html>
