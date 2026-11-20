@@ -3,7 +3,7 @@
 > Cópia no repositório do diário mantido no Projeto do Claude. Atualizar ao fim de cada etapa.
 
 ## Estado atual
-- Etapa: **Etapa 7 entregue (20/11 ~05h) — MARCO: grosso pronto.** Etapas 4–6 validadas pela Sara.
+- Etapa: **Etapa 8 entregue (20/11 ~06h)** — Resumo do período, métricas e 45 testes Jest. Etapa 7 validada.
 - Supabase: projeto `keepops` em us-west-2 (Oregon), plano free.
 - Stack instalada: Expo SDK 58, React Native 0.88, Expo Router, TypeScript strict, Geist/Geist Mono, lucide-react-native, react-native-svg, ESLint (eslint-config-expo) + Prettier.
 
@@ -15,7 +15,7 @@
 - [x] 5 — Validação + health check + concluir GMUD
 - [x] 6 — Ocorrências + Pendências
 - [x] 7 — Turnos + passagem + recebimento (MARCO: grosso pronto)
-- [ ] 8 — Resumo do período, métricas, testes
+- [x] 8 — Resumo do período, métricas, testes
 - [ ] 9 — Polimento, README, vídeo
 
 ## Log
@@ -29,3 +29,4 @@
 - 20/11 — Etapa 5: tela de validação por aplicação (Aprovado/Reprovado/N/A otimista + haptics, observação, autor/horário, criar pendência), health check real baseline × pós com URL reserva (httpbingo.org), concluir GMUD com resultado sugerido + justificativa obrigatória se divergir + sugestão de pendência.
 - 20/11 — Etapa 6: Ocorrências (lista Abertas/Resolvidas, nova com pré-preenchimento a partir do passo reprovado, detalhe com timeline, registrar acionamento, marcar respondido, nota, resolver) + Pendências (Minhas/Sem responsável/Todas/Concluídas, criar manual, detalhe com origem clicável, assumir, concluir com nota obrigatória).
 - 20/11 — Etapa 7 (marco): aba Plantões (turno atual com prévia da passagem gerada por buildHandover, observações/próximos passos com rascunho salvo, compartilhar via Share, encerrar com snapshot; histórico), detalhe da passagem com Confirmar recebimento, banner no Início, refetch ao focar abas.
+- 20/11 — Etapa 8: Resumo do período (último fim de semana / últimas 24h, agrupado por turno, compartilhável), Métricas (taxa de falha + MTTR com filtro semana × fim de semana, gráficos simples), cards no Início, jest-expo + 45 testes das funções puras (`npm test`).

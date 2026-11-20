@@ -1,5 +1,12 @@
 import { router } from 'expo-router';
-import { ArrowRightLeft, CircleCheck, Layers } from 'lucide-react-native';
+import {
+  ArrowRightLeft,
+  CalendarRange,
+  ChartColumn,
+  ChevronRight,
+  CircleCheck,
+  Layers,
+} from 'lucide-react-native';
 import { Alert, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { BrandHeader } from '@/components/domain/BrandHeader';
@@ -17,11 +24,14 @@ import { ErrorState, Skeleton } from '@/components/ui/StateViews';
 import { useAssignFollowUp, useHome, useStartShift } from '@/hooks/useHome';
 import { useNow } from '@/hooks/useNow';
 import { useProfile } from '@/hooks/useProfile';
+import { useMetricsData } from '@/hooks/usePeriod';
 import { usePendingHandover } from '@/hooks/useShifts';
 import { signOut } from '@/services/auth';
 import { colors, fonts, spacing, typography } from '@/theme';
 import { formatLongDate, formatTime, greeting } from '@/utils/format';
+import { spParts } from '@/utils/calendar';
 import { countWindow, counterStatuses, type WindowCounters } from '@/utils/home';
+import { changeFailureRate, formatDuration, formatRate, meanTimeToRestore } from '@/utils/metrics';
 import { shiftKindLabel, suggestShiftKind, type ShiftKind } from '@/utils/shiftKind';
 import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 
@@ -49,7 +59,10 @@ export default function HomeScreen() {
   const { data: profile } = useProfile();
   const home = useHome();
   const pendingHandover = usePendingHandover();
-  useRefreshOnFocus(() => Promise.all([home.refetch(), pendingHandover.refetch()]));
+  const metrics = useMetricsData(30);
+  useRefreshOnFocus(() =>
+    Promise.all([home.refetch(), pendingHandover.refetch(), metrics.refetch()]),
+  );
   const startShift = useStartShift();
   const assign = useAssignFollowUp();
 
@@ -87,6 +100,13 @@ export default function HomeScreen() {
   const validatingNow = data?.changes.find((c) => c.status === 'em_validacao');
   const mine = data?.followUps.filter((f) => f.assignedTo === profile?.id) ?? [];
   const unassigned = data?.followUps.filter((f) => f.assignedTo === null) ?? [];
+  // Monday/Tuesday: the weekend summary is the news; other days, the last 24h.
+  const weekendNews = [1, 2].includes(spParts(now).dow);
+  const md = metrics.data;
+  const cfr = md ? changeFailureRate(md.changes, md.incidents) : null;
+  const mttr = md
+    ? meanTimeToRestore(md.incidents, new Map(md.changes.map((c) => [c.id, c.window_start])))
+    : null;
 
   return (
     <Screen
@@ -178,6 +198,30 @@ export default function HomeScreen() {
               loading={startShift.isPending}
             />
           ) : null}
+
+          <Card
+            style={styles.linkCard}
+            onPress={() =>
+              router.push({
+                pathname: '/shifts/summary',
+                params: { period: weekendNews ? 'weekend' : '24h' },
+              })
+            }
+            accessibilityLabel={
+              weekendNews ? 'Resumo do fim de semana disponível' : 'Resumo das últimas 24 horas'
+            }
+          >
+            <CalendarRange size={18} color={colors.brandPrimaryText} strokeWidth={1.9} />
+            <View style={styles.flex}>
+              <Text style={styles.linkTitle}>
+                {weekendNews ? 'Resumo do fim de semana disponível' : 'Resumo das últimas 24h'}
+              </Text>
+              <Text style={styles.bannerMeta}>
+                GMUDs, ocorrências e pendências de todos os turnos
+              </Text>
+            </View>
+            <ChevronRight size={18} color={colors.dim} strokeWidth={1.8} />
+          </Card>
 
           <SectionHeader
             title={data.shift ? 'Janela do turno' : 'GMUDs de hoje'}
@@ -303,6 +347,34 @@ export default function HomeScreen() {
               <Text style={styles.allClearText}>Todas as pendências têm responsável.</Text>
             </Card>
           )}
+
+          <SectionHeader
+            title="Métricas · 30 dias"
+            actionLabel="Ver tudo"
+            onAction={() => router.push('/metrics')}
+          />
+          <Card
+            style={styles.metrics}
+            onPress={() => router.push('/metrics')}
+            accessibilityLabel="Abrir métricas"
+          >
+            <View style={styles.metric}>
+              <Text style={styles.metricLabel}>Taxa de falha</Text>
+              <Text
+                style={[
+                  styles.metricValue,
+                  { color: (cfr?.rate ?? 0) > 0.15 ? colors.badText : colors.okText },
+                ]}
+              >
+                {formatRate(cfr?.rate ?? null)}
+              </Text>
+            </View>
+            <View style={styles.metric}>
+              <Text style={styles.metricLabel}>MTTR</Text>
+              <Text style={styles.metricValue}>{formatDuration(mttr?.minutes ?? null)}</Text>
+            </View>
+            <ChartColumn size={20} color={colors.dim} strokeWidth={1.8} />
+          </Card>
         </>
       ) : null}
     </Screen>
@@ -319,6 +391,12 @@ const styles = StyleSheet.create({
   grid: { gap: spacing.md },
   gridRow: { flexDirection: 'row', gap: spacing.md },
   flex: { flex: 1 },
+  linkCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  linkTitle: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text },
+  metrics: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
+  metric: { flex: 1, gap: 2 },
+  metricLabel: { fontFamily: fonts.medium, fontSize: 13, color: colors.muted },
+  metricValue: { fontFamily: fonts.semibold, fontSize: 24, color: colors.text },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',

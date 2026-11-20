@@ -19,4 +19,4 @@ Leia nesta ordem antes de qualquer trabalho:
 - Chaves: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_KEY` (publishable) no app; `SUPABASE_SECRET_KEY` só no seed. Nunca commitar `.env.local`.
 
 ## Antes de dizer "pronto"
-`npm run check` (typecheck + lint) sem erros.
+`npm run check` (typecheck + lint + Jest) sem erros. Testes em `__tests__/` importam `describe/it/expect` de `@jest/globals`.

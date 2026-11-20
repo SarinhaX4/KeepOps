@@ -27,7 +27,8 @@ Expo SDK 58 · React Native · TypeScript (strict) · Expo Router · Supabase (P
 Senha de todos: `KeepOps#Demo2026` (ambiente demonstrativo).
 
 ## Scripts
-- `npm run check` — typecheck + lint
+- `npm run check` — typecheck + lint + testes
+- `npm test` — testes unitários (Jest)
 - `npm run seed` — recria os dados demonstrativos
 - `npm run format` — Prettier
 

@@ -284,6 +284,11 @@ export default function ShiftsScreen() {
             selected={tab === 'history'}
             onPress={() => setTab('history')}
           />
+          <Chip
+            label="Resumo do período"
+            selected={false}
+            onPress={() => router.push('/shifts/summary')}
+          />
         </View>
         {tab === 'history' ? (
           <History />
@@ -304,7 +309,7 @@ export default function ShiftsScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
   title: { ...typography.display, color: colors.text },
-  tabs: { flexDirection: 'row', gap: spacing.sm },
+  tabs: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   auto: { fontFamily: fonts.mono, fontSize: 11, color: colors.dim },
   pending: { gap: spacing.sm, borderColor: colors.warn },
   pendingTitle: { ...typography.title, color: colors.text },
