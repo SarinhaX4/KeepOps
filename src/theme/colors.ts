@@ -1,6 +1,7 @@
 /**
  * KeepOps color tokens.
- * Source of truth: docs/IDENTIDADE_VISUAL.md (section 4).
+ * Source of truth: docs/IDENTIDADE_VISUAL.md (section 4) + "Ajuste de 20/11" at its end:
+ * the whole UI now derives from the logo's aqua → cyan family, on a deeper black.
  *
  * Rule: brand colors (aqua/cyan) mean identity and action.
  * Status colors (ok/warn/bad/info/neutral) mean operational state.
@@ -9,43 +10,45 @@
 
 export const darkColors = {
   // Base
-  bg: '#0B0F11',
-  surface: '#111719',
-  surface2: '#1A2427',
-  border: 'rgba(237, 239, 238, 0.08)',
-  borderHi: 'rgba(237, 239, 238, 0.16)',
+  bg: '#040607',
+  surface: '#0A0F11',
+  surface2: '#121A1D',
+  border: 'rgba(237, 239, 238, 0.07)',
+  borderHi: 'rgba(237, 239, 238, 0.15)',
 
   // Text
   text: '#EDEFEE',
   muted: '#9BA3A0',
-  dim: '#68716D',
+  dim: '#78827E',
 
   // Brand
+  // Logo gradient: aqua #10BFA5 → cyan #22C3EE. Text tint sits between both.
   brandPrimary: '#10BFA5',
-  brandPrimaryText: '#5DE2C7',
-  brandPrimarySoft: 'rgba(16, 191, 165, 0.14)',
+  brandPrimaryText: '#2FD3CB',
+  brandPrimarySoft: 'rgba(16, 191, 165, 0.13)',
   brandSecondary: '#22C3EE',
-  brandSecondaryText: '#7DDCF4',
-  brandSecondarySoft: 'rgba(34, 195, 238, 0.13)',
-  brandHighlight: '#8B5CF6',
-  onBrandPrimary: '#042B26',
+  brandSecondaryText: '#67D8F5',
+  brandSecondarySoft: 'rgba(34, 195, 238, 0.12)',
+  /** Third tone of the family (light sky), used for avatars/accents — no violet. */
+  brandHighlight: '#7DD3FC',
+  onBrandPrimary: '#03241F',
 
-  // Operational states
-  ok: '#22C55E',
-  okText: '#86EFAC',
-  okSoft: 'rgba(34, 197, 94, 0.14)',
+  // Operational states — same cool family, still distinct by hue + icon + text.
+  ok: '#34D399',
+  okText: '#7EE8BC',
+  okSoft: 'rgba(52, 211, 153, 0.13)',
   warn: '#F59E0B',
   warnText: '#FCD34D',
   warnSoft: 'rgba(245, 158, 11, 0.14)',
   bad: '#F43F5E',
   badText: '#FDA4AF',
   badSoft: 'rgba(244, 63, 94, 0.14)',
-  info: '#3B82F6',
-  infoText: '#93C5FD',
-  infoSoft: 'rgba(59, 130, 246, 0.14)',
-  neutral: '#64748B',
-  neutralText: '#CBD5E1',
-  neutralSoft: 'rgba(100, 116, 139, 0.14)',
+  info: '#38BDF8',
+  infoText: '#8AD7FA',
+  infoSoft: 'rgba(56, 189, 248, 0.13)',
+  neutral: '#5B6B73',
+  neutralText: '#B7C4CA',
+  neutralSoft: 'rgba(91, 107, 115, 0.16)',
 } as const;
 
 export type ColorToken = keyof typeof darkColors;

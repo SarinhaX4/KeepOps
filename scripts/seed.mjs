@@ -44,7 +44,7 @@ const USERS = [
     email: 'marina.costa@example.com',
     full_name: 'Marina Costa',
     role: 'analista',
-    avatar_color: '#8B5CF6',
+    avatar_color: '#7DD3FC',
   },
 ];
 

@@ -462,3 +462,24 @@ Ao aplicar este documento ao projeto existente:
 Implemente a identidade visual deste documento no projeto KeepOps existente. Faça a atualização visual de forma incremental, sem reescrever o aplicativo inteiro e sem alterar lógica que já funciona.
 
 Antes de finalizar, confira todas as telas principais no tema escuro e verifique o contraste entre marca e estados operacionais. Se uma decisão de interface não estiver especificada, escolha a solução mais simples, legível e coerente com a prancha aprovada. Não crie uma nova proposta de branding.
+
+---
+
+## Ajuste de 20/11/2026 (aprovado pela responsável)
+
+Feedback: as cores da interface "brigavam" com a logo. Toda a paleta do tema escuro passou a derivar da família **aqua → ciano** do símbolo, sobre um preto mais profundo. Os estados continuam distintos por **tom + ícone + texto**.
+
+| Token | Antes | Agora |
+|---|---|---|
+| `bg` | `#0B0F11` | `#040607` |
+| `surface` / `surface2` | `#111719` / `#1A2427` | `#0A0F11` / `#121A1D` |
+| `brandPrimaryText` (links, aba ativa) | `#5DE2C7` | `#2FD3CB` (entre o aqua e o ciano da logo) |
+| `brandSecondaryText` | `#7DDCF4` | `#67D8F5` |
+| `brandHighlight` | `#8B5CF6` (violeta) | `#7DD3FC` (céu claro) — violeta removido da interface |
+| `ok` / `okText` | `#22C55E` / `#86EFAC` | `#34D399` / `#7EE8BC` (esmeralda, puxado para a família fria) |
+| `info` / `infoText` | `#3B82F6` / `#93C5FD` | `#38BDF8` / `#8AD7FA` (céu, vizinho do ciano) |
+| `neutral` / `neutralText` | `#64748B` / `#CBD5E1` | `#5B6B73` / `#B7C4CA` |
+| `dim` | `#68716D` | `#78827E` (contraste ≥ 4,5:1 no novo fundo) |
+| texto do botão primário | `#042B26` | `#03241F` (7,1:1 sobre o aqua) |
+
+Mantidos: aqua `#10BFA5` e ciano `#22C3EE` (marca), âmbar `#F59E0B` (atenção) e rosa-vermelho `#F43F5E` (falha). Ícone, splash e fundo do app usam `#040607`.
