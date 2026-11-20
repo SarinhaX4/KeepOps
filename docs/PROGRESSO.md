@@ -3,7 +3,7 @@
 > Cópia no repositório do diário mantido no Projeto do Claude. Atualizar ao fim de cada etapa.
 
 ## Estado atual
-- Etapa: **Etapa 8 entregue (20/11 ~06h)** — Resumo do período, métricas e 45 testes Jest. Etapa 7 validada.
+- Etapa: **Etapa 9 entregue (20/11 ~12h30)** — MVP completo; falta gravar o vídeo. Etapas 0–8 validadas, 45 testes passando no Windows.
 - Supabase: projeto `keepops` em us-west-2 (Oregon), plano free.
 - Stack instalada: Expo SDK 58, React Native 0.88, Expo Router, TypeScript strict, Geist/Geist Mono, lucide-react-native, react-native-svg, ESLint (eslint-config-expo) + Prettier.
 
@@ -16,7 +16,7 @@
 - [x] 6 — Ocorrências + Pendências
 - [x] 7 — Turnos + passagem + recebimento (MARCO: grosso pronto)
 - [x] 8 — Resumo do período, métricas, testes
-- [ ] 9 — Polimento, README, vídeo
+- [x] 9 — Polimento, README, vídeo
 
 ## Log
 - 17/11 — Ambiente Windows preparado (Node 26, Git).
@@ -30,3 +30,4 @@
 - 20/11 — Etapa 6: Ocorrências (lista Abertas/Resolvidas, nova com pré-preenchimento a partir do passo reprovado, detalhe com timeline, registrar acionamento, marcar respondido, nota, resolver) + Pendências (Minhas/Sem responsável/Todas/Concluídas, criar manual, detalhe com origem clicável, assumir, concluir com nota obrigatória).
 - 20/11 — Etapa 7 (marco): aba Plantões (turno atual com prévia da passagem gerada por buildHandover, observações/próximos passos com rascunho salvo, compartilhar via Share, encerrar com snapshot; histórico), detalhe da passagem com Confirmar recebimento, banner no Início, refetch ao focar abas.
 - 20/11 — Etapa 8: Resumo do período (último fim de semana / últimas 24h, agrupado por turno, compartilhável), Métricas (taxa de falha + MTTR com filtro semana × fim de semana, gráficos simples), cards no Início, jest-expo + 45 testes das funções puras (`npm test`).
+- 20/11 — Etapa 9: seed alinhado ao roteiro do vídeo (CHG0012345 aguardando liberação, baseline 120 ms, INC livre para criar ao vivo, passagens do fim de semana com snapshot real), microanimações de entrada, card de resumo com atalhos fim de semana/24h, LICENSE e README finais, docs/ROTEIRO.md (vídeo + apresentação).

@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChangeListItem } from '@/components/domain/ChangeListItem';
 import { changeStatusTone } from '@/components/domain/StatusBadge';
+import { Appear } from '@/components/ui/Appear';
 import { Chip } from '@/components/ui/Chip';
 import { FAB } from '@/components/ui/FAB';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/StateViews';
@@ -126,11 +127,13 @@ export default function ChangesScreen() {
           data={items}
           keyExtractor={(c) => c.id}
           keyboardShouldPersistTaps="handled"
-          renderItem={({ item }) => (
-            <ChangeListItem
-              change={item}
-              onPress={() => router.push({ pathname: '/changes/[id]', params: { id: item.id } })}
-            />
+          renderItem={({ item, index }) => (
+            <Appear index={index}>
+              <ChangeListItem
+                change={item}
+                onPress={() => router.push({ pathname: '/changes/[id]', params: { id: item.id } })}
+              />
+            </Appear>
           )}
           contentContainerStyle={styles.list}
           refreshControl={

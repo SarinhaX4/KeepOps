@@ -5,6 +5,7 @@ import { Alert, FlatList, RefreshControl, ScrollView, StyleSheet, Text, View } f
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FollowUpRow } from '@/components/domain/FollowUpRow';
+import { Appear } from '@/components/ui/Appear';
 import { Chip } from '@/components/ui/Chip';
 import { FAB } from '@/components/ui/FAB';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/StateViews';
@@ -89,19 +90,23 @@ export default function FollowUpsScreen() {
         <FlatList
           data={items}
           keyExtractor={(f) => f.id}
-          renderItem={({ item }) => (
-            <FollowUpRow
-              followUp={item}
-              currentUserId={me}
-              showAge
-              onPress={() => router.push({ pathname: '/follow-ups/[id]', params: { id: item.id } })}
-              onAssign={() =>
-                assign.mutate(item.id, {
-                  onSuccess: () => toast('Pendência assumida'),
-                  onError: (e) => Alert.alert('Não foi possível assumir', e.message),
-                })
-              }
-            />
+          renderItem={({ item, index }) => (
+            <Appear index={index}>
+              <FollowUpRow
+                followUp={item}
+                currentUserId={me}
+                showAge
+                onPress={() =>
+                  router.push({ pathname: '/follow-ups/[id]', params: { id: item.id } })
+                }
+                onAssign={() =>
+                  assign.mutate(item.id, {
+                    onSuccess: () => toast('Pendência assumida'),
+                    onError: (e) => Alert.alert('Não foi possível assumir', e.message),
+                  })
+                }
+              />
+            </Appear>
           )}
           contentContainerStyle={styles.list}
           refreshControl={

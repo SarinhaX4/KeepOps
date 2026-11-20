@@ -77,6 +77,17 @@ const lastSat = today.dow === 6 ? -7 : -((today.dow + 1) % 7);
 const lastSun = lastSat + 1;
 const lastFri = lastSat - 1;
 
+const HOLIDAYS = new Set(['2026-11-20', '2026-12-25', '2027-01-01']);
+/** Same rule as src/utils/shiftKind.ts (weekend/holiday → fim_de_semana; 19h–7h → noturno). */
+function suggestKind(date) {
+  const spd = new Date(date.getTime() + SP_OFFSET_H * HOUR);
+  const isoDay = spd.toISOString().slice(0, 10);
+  const dow = spd.getUTCDay();
+  const h = spd.getUTCHours();
+  if (dow === 0 || dow === 6 || HOLIDAYS.has(isoDay)) return 'fim_de_semana';
+  return h >= 19 || h < 7 ? 'noturno' : 'diurno';
+}
+
 // ---------------------------------------------------------------------------
 async function must(promise, label) {
   const { data, error } = await promise;
@@ -283,8 +294,8 @@ async function main() {
         {
           team_id: team.id,
           user_id: uid.ana,
-          kind: 'noturno',
-          started_at: iso(ago(4 * HOUR)),
+          kind: suggestKind(ago(2 * HOUR)),
+          started_at: iso(ago(2 * HOUR)),
           status: 'aberto',
         },
       ])
@@ -303,11 +314,12 @@ async function main() {
       change_number: 'CHG0012345',
       title: 'Atualização de Java no cluster de pagamentos',
       description: 'Upgrade do JDK nos nós do cluster de pagamentos.',
-      window_start: ago(2 * HOUR),
-      window_end: new Date(now.getTime() + 2 * HOUR),
+      // Video script: the executor already started; Ana releases it live.
+      window_start: ago(30 * MIN),
+      window_end: new Date(now.getTime() + 3 * HOUR + 30 * MIN),
       executor_team: 'Fornecedor Demo — Middleware',
       executor_contact: 'Plantão Middleware · (61) 0000-0000',
-      status: 'em_validacao',
+      status: 'aguardando_liberacao',
       apps: ['portal', 'api'],
     },
     {
@@ -315,8 +327,8 @@ async function main() {
       change_number: 'CHG0012346',
       title: 'Aplicação de patch no OHS',
       description: 'Patch de segurança do Oracle HTTP Server do Internet Banking.',
-      window_start: ago(5 * HOUR),
-      window_end: ago(3 * HOUR),
+      window_start: ago(110 * MIN),
+      window_end: ago(50 * MIN),
       executor_team: 'Equipe Web Demo',
       executor_contact: 'Teams · canal #web-demo',
       status: 'validada',
@@ -417,19 +429,7 @@ async function main() {
     return rows;
   }
 
-  const t30 = ago(30 * MIN);
-  await setResults('java', 'portal', () => ({ result: 'aprovado' }), uid.ana, ago(45 * MIN));
-  const apiRows = await setResults(
-    'java',
-    'api',
-    (p) =>
-      p === 1
-        ? { result: 'reprovado', note: 'Health check retornou HTTP 503 após o restart.' }
-        : { result: 'pendente' },
-    uid.ana,
-    t30,
-  );
-  await setResults('ohs', 'ib', () => ({ result: 'aprovado' }), uid.ana, ago(3 * HOUR));
+  await setResults('ohs', 'ib', () => ({ result: 'aprovado' }), uid.ana, ago(56 * MIN));
   await setResults(
     'kernel',
     'bus',
@@ -454,11 +454,10 @@ async function main() {
   });
   await must(
     db.from('change_events').insert([
-      ev('java', 'agendada', 'aguardando_liberacao', ago(2 * HOUR), uid.ana),
-      ev('java', 'aguardando_liberacao', 'em_validacao', ago(2 * HOUR - 15 * MIN), uid.ana),
-      ev('ohs', 'agendada', 'aguardando_liberacao', ago(5 * HOUR), uid.ana),
-      ev('ohs', 'aguardando_liberacao', 'em_validacao', ago(4 * HOUR), uid.ana),
-      ev('ohs', 'em_validacao', 'validada', ago(3 * HOUR), uid.ana),
+      ev('java', 'agendada', 'aguardando_liberacao', ago(28 * MIN), uid.ana),
+      ev('ohs', 'agendada', 'aguardando_liberacao', ago(110 * MIN), uid.ana),
+      ev('ohs', 'aguardando_liberacao', 'em_validacao', ago(80 * MIN), uid.ana),
+      ev('ohs', 'em_validacao', 'validada', ago(55 * MIN), uid.ana),
       ev('kernel', 'agendada', 'aguardando_liberacao', sp(lastSat, 10), uid.joao),
       ev('kernel', 'aguardando_liberacao', 'em_validacao', sp(lastSat, 11, 10), uid.joao),
       ev('kernel', 'em_validacao', 'validada_com_ressalvas', sp(lastSat, 12, 5), uid.joao, changes.kernel.conclusion_note),
@@ -480,7 +479,7 @@ async function main() {
         latency_ms: 118,
         ok: true,
         checked_by: uid.ana,
-        checked_at: iso(ago(2 * HOUR + 10 * MIN)),
+        checked_at: iso(ago(40 * MIN)),
       },
       {
         application_id: apps.api,
@@ -490,28 +489,7 @@ async function main() {
         latency_ms: 120,
         ok: true,
         checked_by: uid.ana,
-        checked_at: iso(ago(2 * HOUR + 9 * MIN)),
-      },
-      {
-        application_id: apps.portal,
-        change_id: changes.java.id,
-        phase: 'pos',
-        http_status: 200,
-        latency_ms: 131,
-        ok: true,
-        checked_by: uid.ana,
-        checked_at: iso(ago(46 * MIN)),
-      },
-      {
-        application_id: apps.api,
-        change_id: changes.java.id,
-        phase: 'pos',
-        http_status: 503,
-        latency_ms: 87,
-        ok: false,
-        error_message: 'Service Unavailable',
-        checked_by: uid.ana,
-        checked_at: iso(t30),
+        checked_at: iso(ago(39 * MIN)),
       },
       {
         application_id: apps.ib,
@@ -521,7 +499,7 @@ async function main() {
         latency_ms: 142,
         ok: true,
         checked_by: uid.ana,
-        checked_at: iso(ago(5 * HOUR + 5 * MIN)),
+        checked_at: iso(ago(108 * MIN)),
       },
       {
         application_id: apps.ib,
@@ -531,28 +509,25 @@ async function main() {
         latency_ms: 139,
         ok: true,
         checked_by: uid.ana,
-        checked_at: iso(ago(3 * HOUR + 5 * MIN)),
+        checked_at: iso(ago(57 * MIN)),
       },
     ]),
     'health checks',
   );
 
   console.log('→ Ocorrências');
-  const apiFailed = apiRows.find((r) => r.position === 1);
   const [inc] = await must(
     db
       .from('incidents')
       .insert({
         team_id: team.id,
-        change_id: changes.java.id,
-        application_id: apps.api,
-        validation_id: apiFailed?.id ?? null,
-        title: 'API de Pagamentos indisponível após atualização de Java',
-        severity: 'sev2',
+        application_id: apps.bus,
+        title: 'Atraso na fila de liquidação do barramento',
+        severity: 'sev3',
         status: 'em_acompanhamento',
-        external_ticket: 'INC0012345',
+        external_ticket: 'INC0012344',
         opened_by: uid.ana,
-        opened_at: iso(ago(28 * MIN)),
+        opened_at: iso(ago(45 * MIN)),
       })
       .select(),
     'ocorrência principal',
@@ -562,18 +537,18 @@ async function main() {
       {
         incident_id: inc.id,
         kind: 'nota',
-        description: 'Ocorrência aberta a partir do passo reprovado "Health check HTTP".',
+        description: 'Fila de liquidação com 300+ mensagens acumuladas; consumidores lentos.',
         created_by: uid.ana,
-        created_at: iso(ago(28 * MIN)),
+        created_at: iso(ago(45 * MIN)),
       },
       {
         incident_id: inc.id,
         kind: 'acionamento',
-        description: 'Executor acionado para análise do HTTP 503.',
-        channel: 'Telefone',
-        contact: 'Plantão Middleware (fornecedor demo)',
+        description: 'Equipe de integração acionada para verificar os consumidores.',
+        channel: 'Teams',
+        contact: 'Plantão Integração (fornecedor demo)',
         created_by: uid.ana,
-        created_at: iso(ago(25 * MIN)),
+        created_at: iso(ago(40 * MIN)),
       },
     ]),
     'eventos da ocorrência',
@@ -760,6 +735,64 @@ async function main() {
         'ocorrência histórica',
       );
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Real handover snapshots for last weekend's shifts (same shape as buildHandover v1).
+  // -------------------------------------------------------------------------
+  console.log('→ Passagens do fim de semana');
+  const fus = await must(
+    db.from('follow_ups').select('id, title, created_at, assigned_to').eq('team_id', team.id),
+    'ler pendências',
+  );
+  const fuBefore = (at) =>
+    fus
+      .filter((f) => new Date(f.created_at) <= at && f.title !== 'Confirmar rotação de logs do Portal')
+      .map((f) => ({ id: f.id, title: f.title, assigneeName: null, origin: null }));
+  const changeSnap = (key, apps) => ({
+    id: changes[key].id,
+    number: changes[key].change_number,
+    title: changes[key].title,
+    status: changes[key].status,
+    windowStart: iso(changes[key].window_start),
+    windowEnd: iso(changes[key].window_end),
+    apps,
+  });
+  const snapshot = (shift, authorName, endedAt, changesList, incidentsList, followUpsList, notes, nextSteps) => ({
+    version: 1,
+    generatedAt: iso(endedAt),
+    shift: { id: shift.id, kind: shift.kind, startedAt: shift.started_at, endedAt: iso(endedAt), authorName },
+    totals: {
+      changes: changesList.length,
+      validated: changesList.filter((c) => ['validada', 'validada_com_ressalvas'].includes(c.status)).length,
+      failed: changesList.filter((c) => c.status === 'reprovada').length,
+      inProgress: 0,
+      openIncidents: incidentsList.filter((i) => i.status !== 'resolvida').length,
+      unansweredCalls: 0,
+      openFollowUps: followUpsList.length,
+    },
+    changes: changesList,
+    incidents: incidentsList,
+    unansweredCalls: [],
+    followUps: followUpsList,
+    notes,
+    nextSteps,
+  });
+  const [, , sunDay] = shiftRows;
+  const kernelSnap = changeSnap('kernel', [
+    { name: 'Barramento de Integração', approved: 3, failed: 1, notApplicable: 0, pending: 0, total: 4, check: { httpStatus: 200, latencyMs: 210, ok: true } },
+  ]);
+  const restartSnap = changeSnap('restart', [
+    { name: 'Internet Banking', approved: 4, failed: 0, notApplicable: 0, pending: 0, total: 4, check: { httpStatus: 200, latencyMs: 161, ok: true } },
+  ]);
+  const weekendInc = { id: incWeekend.id, ticket: 'INC0012340', title: 'Mensagens presas na fila de liquidação do ESB', severity: 'sev3', status: 'resolvida', appName: 'Barramento de Integração' };
+  const snaps = [
+    [satDay, snapshot(satDay, 'João Lima', sp(lastSat, 19), [kernelSnap], [weekendInc], fuBefore(sp(lastSat, 19)), satDay.notes ?? '', satDay.next_steps ?? '')],
+    [satNight, snapshot(satNight, 'Ana Souza', sp(lastSun, 7), [restartSnap], [], fuBefore(sp(lastSun, 7)), satNight.notes ?? '', satNight.next_steps ?? '')],
+    [sunDay, snapshot(sunDay, 'João Lima', sp(lastSun, 19), [], [], fuBefore(sp(lastSun, 19)), sunDay.notes ?? '', sunDay.next_steps ?? '')],
+  ];
+  for (const [shift, snap] of snaps) {
+    await must(db.from('shifts').update({ handover_snapshot: snap }).eq('id', shift.id), 'snapshot da passagem');
   }
 
   console.log('\n✓ Seed concluído.');

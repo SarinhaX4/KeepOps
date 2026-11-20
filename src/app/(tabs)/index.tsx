@@ -15,7 +15,9 @@ import { FollowUpRow } from '@/components/domain/FollowUpRow';
 import { OpenShiftCard, StartShiftCard } from '@/components/domain/ShiftCard';
 import { ValidationNowCard } from '@/components/domain/ValidationNowCard';
 import { Avatar } from '@/components/ui/Avatar';
+import { Appear } from '@/components/ui/Appear';
 import { Card } from '@/components/ui/Card';
+import { Chip } from '@/components/ui/Chip';
 import { IconButton } from '@/components/ui/IconButton';
 import { Screen } from '@/components/ui/Screen';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -160,7 +162,7 @@ export default function HomeScreen() {
       ) : home.isError ? (
         <ErrorState message={home.error.message} onRetry={() => void home.refetch()} />
       ) : data && counters && profile ? (
-        <>
+        <Appear style={styles.stack}>
           {pendingHandover.data && isOnCall ? (
             <Card
               style={styles.banner}
@@ -199,28 +201,34 @@ export default function HomeScreen() {
             />
           ) : null}
 
-          <Card
-            style={styles.linkCard}
-            onPress={() =>
-              router.push({
-                pathname: '/shifts/summary',
-                params: { period: weekendNews ? 'weekend' : '24h' },
-              })
-            }
-            accessibilityLabel={
-              weekendNews ? 'Resumo do fim de semana disponível' : 'Resumo das últimas 24 horas'
-            }
-          >
-            <CalendarRange size={18} color={colors.brandPrimaryText} strokeWidth={1.9} />
-            <View style={styles.flex}>
-              <Text style={styles.linkTitle}>
-                {weekendNews ? 'Resumo do fim de semana disponível' : 'Resumo das últimas 24h'}
-              </Text>
-              <Text style={styles.bannerMeta}>
-                GMUDs, ocorrências e pendências de todos os turnos
-              </Text>
+          <Card style={styles.summaryCard}>
+            <View style={styles.linkCard}>
+              <CalendarRange size={18} color={colors.brandPrimaryText} strokeWidth={1.9} />
+              <View style={styles.flex}>
+                <Text style={styles.linkTitle}>
+                  {weekendNews ? 'Resumo do fim de semana disponível' : 'Resumo do período'}
+                </Text>
+                <Text style={styles.bannerMeta}>
+                  GMUDs, ocorrências e pendências de todos os turnos
+                </Text>
+              </View>
             </View>
-            <ChevronRight size={18} color={colors.dim} strokeWidth={1.8} />
+            <View style={styles.summaryChips}>
+              <Chip
+                label="Último fim de semana"
+                selected={weekendNews}
+                onPress={() =>
+                  router.push({ pathname: '/shifts/summary', params: { period: 'weekend' } })
+                }
+              />
+              <Chip
+                label="Últimas 24h"
+                selected={!weekendNews}
+                onPress={() =>
+                  router.push({ pathname: '/shifts/summary', params: { period: '24h' } })
+                }
+              />
+            </View>
           </Card>
 
           <SectionHeader
@@ -375,7 +383,7 @@ export default function HomeScreen() {
             </View>
             <ChartColumn size={20} color={colors.dim} strokeWidth={1.8} />
           </Card>
-        </>
+        </Appear>
       ) : null}
     </Screen>
   );
@@ -386,11 +394,13 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   date: { ...typography.bodySmall, color: colors.muted },
   greeting: { ...typography.display, color: colors.text },
-  stack: { gap: spacing.md },
+  stack: { gap: spacing.lg },
   mono: { fontFamily: fonts.mono, fontSize: 13, color: colors.muted },
   grid: { gap: spacing.md },
   gridRow: { flexDirection: 'row', gap: spacing.md },
   flex: { flex: 1 },
+  summaryCard: { gap: spacing.md },
+  summaryChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   linkCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   linkTitle: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text },
   metrics: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },

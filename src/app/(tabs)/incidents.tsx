@@ -5,6 +5,7 @@ import { FlatList, RefreshControl, ScrollView, StyleSheet, Text, View } from 're
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IncidentListItem } from '@/components/domain/IncidentListItem';
+import { Appear } from '@/components/ui/Appear';
 import { Chip } from '@/components/ui/Chip';
 import { FAB } from '@/components/ui/FAB';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/StateViews';
@@ -61,11 +62,15 @@ export default function IncidentsScreen() {
         <FlatList
           data={items}
           keyExtractor={(i) => i.id}
-          renderItem={({ item }) => (
-            <IncidentListItem
-              incident={item}
-              onPress={() => router.push({ pathname: '/incidents/[id]', params: { id: item.id } })}
-            />
+          renderItem={({ item, index }) => (
+            <Appear index={index}>
+              <IncidentListItem
+                incident={item}
+                onPress={() =>
+                  router.push({ pathname: '/incidents/[id]', params: { id: item.id } })
+                }
+              />
+            </Appear>
           )}
           contentContainerStyle={styles.list}
           refreshControl={
