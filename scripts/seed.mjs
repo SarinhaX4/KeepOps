@@ -442,6 +442,33 @@ async function main() {
   );
   await setResults('restart', 'ib', () => ({ result: 'aprovado' }), uid.ana, sp(lastSun, 6, 40));
 
+  // Status history (the trigger only logs "created" for rows inserted already finalized).
+  console.log('→ Histórico de status');
+  const ev = (key, from, to, at, by, note = null) => ({
+    change_id: changes[key].id,
+    from_status: from,
+    to_status: to,
+    changed_at: iso(at),
+    changed_by: by,
+    note,
+  });
+  await must(
+    db.from('change_events').insert([
+      ev('java', 'agendada', 'aguardando_liberacao', ago(2 * HOUR), uid.ana),
+      ev('java', 'aguardando_liberacao', 'em_validacao', ago(2 * HOUR - 15 * MIN), uid.ana),
+      ev('ohs', 'agendada', 'aguardando_liberacao', ago(5 * HOUR), uid.ana),
+      ev('ohs', 'aguardando_liberacao', 'em_validacao', ago(4 * HOUR), uid.ana),
+      ev('ohs', 'em_validacao', 'validada', ago(3 * HOUR), uid.ana),
+      ev('kernel', 'agendada', 'aguardando_liberacao', sp(lastSat, 10), uid.joao),
+      ev('kernel', 'aguardando_liberacao', 'em_validacao', sp(lastSat, 11, 10), uid.joao),
+      ev('kernel', 'em_validacao', 'validada_com_ressalvas', sp(lastSat, 12, 5), uid.joao, changes.kernel.conclusion_note),
+      ev('restart', 'agendada', 'aguardando_liberacao', sp(lastSun, 6), uid.ana),
+      ev('restart', 'aguardando_liberacao', 'em_validacao', sp(lastSun, 6, 25), uid.ana),
+      ev('restart', 'em_validacao', 'validada', sp(lastSun, 6, 45), uid.ana),
+    ]),
+    'histórico de status',
+  );
+
   console.log('→ Health checks');
   await must(
     db.from('health_checks').insert([

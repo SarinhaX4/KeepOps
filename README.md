@@ -13,7 +13,7 @@ Expo SDK 58 · React Native · TypeScript (strict) · Expo Router · Supabase (P
 
 1. `npm install`
 2. Copie `.env.example` para `.env.local` e preencha com as chaves do seu projeto Supabase.
-3. No Supabase, abra **SQL Editor** e execute `supabase/migrations/20261119000000_init.sql`.
+3. No Supabase, abra **SQL Editor** e execute, em ordem, os arquivos de `supabase/migrations/`.
 4. `npm run seed` — cria a equipe demo, os usuários e os dados de exemplo.
 5. `npx expo start` e abra no Expo Go.
 

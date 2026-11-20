@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { Toast } from '@/components/ui/Toast';
 import { useAuthListener } from '@/hooks/useAuthListener';
 import { queryClient } from '@/lib/queryClient';
 import { useSessionStore } from '@/store/session';
@@ -46,6 +47,10 @@ function RootNavigator() {
         />
         <Stack.Screen name="changes/[id]/index" options={{ headerShown: true, title: 'GMUD' }} />
         <Stack.Screen
+          name="changes/[id]/edit"
+          options={{ headerShown: true, title: 'Editar GMUD' }}
+        />
+        <Stack.Screen
           name="applications/index"
           options={{ headerShown: true, title: 'Aplicações' }}
         />
@@ -62,6 +67,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <StatusBar style="light" />
       <RootNavigator />
+      <Toast />
     </QueryClientProvider>
   );
 }

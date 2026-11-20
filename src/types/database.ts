@@ -201,6 +201,51 @@ export type Database = {
           },
         ];
       };
+      change_events: {
+        Row: {
+          id: string;
+          change_id: string;
+          from_status: Database['public']['Enums']['change_status'] | null;
+          to_status: Database['public']['Enums']['change_status'];
+          note: string | null;
+          changed_by: string | null;
+          changed_at: string;
+        };
+        Insert: {
+          id?: string;
+          change_id: string;
+          from_status?: Database['public']['Enums']['change_status'] | null;
+          to_status: Database['public']['Enums']['change_status'];
+          note?: string | null;
+          changed_by?: string | null;
+          changed_at?: string;
+        };
+        Update: {
+          id?: string;
+          change_id?: string;
+          from_status?: Database['public']['Enums']['change_status'] | null;
+          to_status?: Database['public']['Enums']['change_status'];
+          note?: string | null;
+          changed_by?: string | null;
+          changed_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'change_events_change_id_fkey';
+            columns: ['change_id'];
+            isOneToOne: false;
+            referencedRelation: 'changes';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'change_events_changed_by_fkey';
+            columns: ['changed_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       change_applications: {
         Row: {
           change_id: string;
