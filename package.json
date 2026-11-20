@@ -74,5 +74,7 @@
     "testMatch": [
       "<rootDir>/__tests__/**/*.test.ts"
     ]
-  }
+  },
+  "license": "UNLICENSED",
+  "author": "Sara Cristina Barros de Oliveira"
 }

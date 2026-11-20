@@ -97,4 +97,4 @@ GitHub Actions (lint, typecheck e testes em todo PR) · migrations por pipeline 
 - [Especificação](docs/SPEC.md) · [Identidade visual](docs/IDENTIDADE_VISUAL.md) · [Progresso](docs/PROGRESSO.md) · [Roteiro do vídeo e da apresentação](docs/ROTEIRO.md)
 
 ---
-MIT © 2026 Sara Cristina Barros de Oliveira
+© 2026 Sara Cristina Barros de Oliveira — **todos os direitos reservados**. Código visível para avaliação e portfólio; cópia, redistribuição ou uso sem autorização não são permitidos. Veja [LICENSE](LICENSE).
