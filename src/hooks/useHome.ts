@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { assignFollowUpToMe } from '@/services/followUps';
 import { getHomeData, type HomeData } from '@/services/home';
-import { startShift } from '@/services/shifts';
+import { getOpenShift, startShift } from '@/services/shifts';
 import { useSessionStore } from '@/store/session';
 import type { ShiftKind } from '@/utils/shiftKind';
 
@@ -27,7 +27,11 @@ export function useStartShift() {
       if (!profile) throw new Error('Perfil ainda não carregado.');
       return startShift(profile.id, profile.team_id, kind);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['home'] }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['home'] }),
+        queryClient.invalidateQueries({ queryKey: ['shift'] }),
+      ]),
   });
 }
 
@@ -66,5 +70,15 @@ export function useAssignFollowUp() {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['home'] }),
+  });
+}
+
+/** The current user's open shift (null if none). */
+export function useOpenShift() {
+  const userId = useSessionStore((s) => s.session?.user.id);
+  return useQuery({
+    queryKey: ['shift', 'open', userId],
+    queryFn: () => getOpenShift(userId as string),
+    enabled: Boolean(userId),
   });
 }

@@ -73,11 +73,11 @@ export async function createChange(input: NewChangeInput, userId: string, teamId
 }
 
 export type ChangeDetail = Tables<'changes'> & {
-  apps: (Pick<Tables<'applications'>, 'id' | 'name' | 'short_name'> & {
-    steps: Pick<
+  apps: (Pick<Tables<'applications'>, 'id' | 'name' | 'short_name' | 'health_url'> & {
+    steps: (Pick<
       Tables<'validations'>,
-      'id' | 'step_title' | 'position' | 'result' | 'note' | 'performed_at'
-    >[];
+      'id' | 'step_title' | 'position' | 'result' | 'note' | 'performed_at' | 'performed_by'
+    > & { by: string | null })[];
   })[];
   events: (Pick<
     Tables<'change_events'>,
@@ -99,12 +99,14 @@ export async function getChange(id: string): Promise<ChangeDetail> {
   const [changeRes, valRes, evRes, incRes, checkRes] = await Promise.all([
     supabase
       .from('changes')
-      .select('*, change_applications(applications(id, name, short_name))')
+      .select('*, change_applications(applications(id, name, short_name, health_url))')
       .eq('id', id)
       .single(),
     supabase
       .from('validations')
-      .select('id, application_id, step_title, position, result, note, performed_at')
+      .select(
+        'id, application_id, step_title, position, result, note, performed_at, performed_by, profiles(full_name)',
+      )
       .eq('change_id', id)
       .order('position'),
     supabase
@@ -141,7 +143,10 @@ export async function getChange(id: string): Promise<ChangeDetail> {
         ...a,
         steps: valRes.data
           .filter((v) => v.application_id === a.id)
-          .map(({ application_id: _omit, ...step }) => step),
+          .map(({ application_id: _omit, profiles, ...step }) => ({
+            ...step,
+            by: profiles?.full_name ?? null,
+          })),
       })),
     events: evRes.data.map(({ profiles, ...e }) => ({ ...e, by: profiles?.full_name ?? null })),
     incidents: incRes.data,

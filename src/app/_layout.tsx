@@ -11,6 +11,16 @@ import { queryClient } from '@/lib/queryClient';
 import { useSessionStore } from '@/store/session';
 import { colors, fontAssets, fonts } from '@/theme';
 
+/** Stack screens that show a native header: [route, title]. */
+const headerScreens: [string, string][] = [
+  ['changes/new', 'Nova GMUD'],
+  ['changes/[id]/index', 'GMUD'],
+  ['changes/[id]/edit', 'Editar GMUD'],
+  ['changes/[id]/validate/[appId]', 'Validação'],
+  ['changes/[id]/conclude', 'Concluir GMUD'],
+  ['applications/index', 'Aplicações'],
+];
+
 // Keep the splash visible until fonts and the stored session are ready.
 void SplashScreen.preventAutoHideAsync();
 
@@ -41,19 +51,9 @@ function RootNavigator() {
     >
       <Stack.Protected guard={signedIn}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="changes/new"
-          options={{ headerShown: true, title: 'Nova GMUD', presentation: 'card' }}
-        />
-        <Stack.Screen name="changes/[id]/index" options={{ headerShown: true, title: 'GMUD' }} />
-        <Stack.Screen
-          name="changes/[id]/edit"
-          options={{ headerShown: true, title: 'Editar GMUD' }}
-        />
-        <Stack.Screen
-          name="applications/index"
-          options={{ headerShown: true, title: 'Aplicações' }}
-        />
+        {headerScreens.map(([name, title]) => (
+          <Stack.Screen key={name} name={name} options={{ headerShown: true, title }} />
+        ))}
       </Stack.Protected>
       <Stack.Protected guard={!signedIn}>
         <Stack.Screen name="(auth)/login" />

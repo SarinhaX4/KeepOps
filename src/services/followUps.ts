@@ -8,3 +8,28 @@ export async function assignFollowUpToMe(followUpId: string, userId: string): Pr
     .eq('id', followUpId);
   if (error) throw new Error(`Não foi possível assumir a pendência: ${error.message}`);
 }
+
+export type NewFollowUp = {
+  teamId: string;
+  userId: string;
+  title: string;
+  description: string | null;
+  sourceType: 'change' | 'incident' | 'validation' | 'manual';
+  sourceId: string | null;
+  applicationId: string | null;
+  shiftId: string | null;
+};
+
+export async function createFollowUp(f: NewFollowUp): Promise<void> {
+  const { error } = await supabase.from('follow_ups').insert({
+    team_id: f.teamId,
+    title: f.title,
+    description: f.description,
+    source_type: f.sourceType,
+    source_id: f.sourceId,
+    application_id: f.applicationId,
+    created_in_shift_id: f.shiftId,
+    created_by: f.userId,
+  });
+  if (error) throw new Error(`Não foi possível criar a pendência: ${error.message}`);
+}

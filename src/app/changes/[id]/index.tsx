@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { Ban, ChevronRight, Clock, Pencil, Siren, User } from 'lucide-react-native';
+import { Ban, ChevronRight, CircleCheck, Clock, Pencil, Siren, User } from 'lucide-react-native';
 import { Alert, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { ChangeStatusBadge } from '@/components/domain/StatusBadge';
@@ -106,6 +106,12 @@ export default function ChangeDetailScreen() {
               onPress={() => run(action)}
               loading={setStatus.isPending}
             />
+          ) : data.status === 'em_validacao' ? (
+            <Button
+              label="Concluir GMUD"
+              icon={CircleCheck}
+              onPress={() => router.push({ pathname: '/changes/[id]/conclude', params: { id } })}
+            />
           ) : null}
           {canEdit(data.status) || canCancel(data.status) ? (
             <View style={styles.secondary}>
@@ -137,13 +143,24 @@ export default function ChangeDetailScreen() {
           {data.apps.map((app) => {
             const p = validationProgress(app.steps.map((s) => s.result));
             return (
-              <Card key={app.id} style={styles.appCard}>
+              <Card
+                key={app.id}
+                style={styles.appCard}
+                onPress={() =>
+                  router.push({
+                    pathname: '/changes/[id]/validate/[appId]',
+                    params: { id, appId: app.id },
+                  })
+                }
+                accessibilityLabel={`Validar ${app.name}: ${p.done} de ${p.total} passos`}
+              >
                 <View style={styles.top}>
                   <Text style={styles.appName}>{app.name}</Text>
                   <Text style={styles.mono}>
                     {p.done}/{p.total}
                     {p.failed ? ` · ${p.failed} ✗` : ''}
                   </Text>
+                  <ChevronRight size={16} color={colors.dim} strokeWidth={1.8} />
                 </View>
                 <SegmentedProgress
                   ok={p.approved}
@@ -169,7 +186,7 @@ export default function ChangeDetailScreen() {
             );
           })}
           {data.status === 'em_validacao' ? (
-            <Text style={styles.note}>Marcar passos e executar health check chega na Etapa 5.</Text>
+            <Text style={styles.note}>Toque numa aplicação para validar os passos.</Text>
           ) : null}
 
           {data.incidents.length > 0 ? (
