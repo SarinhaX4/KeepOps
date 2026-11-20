@@ -211,7 +211,14 @@ export default function HomeScreen() {
                 countTone="warn"
               />
               {data.calls.map((c) => (
-                <CallRow key={c.id} call={c} now={now} />
+                <CallRow
+                  key={c.id}
+                  call={c}
+                  now={now}
+                  onPress={() =>
+                    router.push({ pathname: '/incidents/[id]', params: { id: c.incidentId } })
+                  }
+                />
               ))}
             </>
           ) : null}
@@ -230,6 +237,9 @@ export default function HomeScreen() {
                   followUp={f}
                   currentUserId={profile.id}
                   onAssign={() => assignFollowUp(f.id)}
+                  onPress={() =>
+                    router.push({ pathname: '/follow-ups/[id]', params: { id: f.id } })
+                  }
                 />
               ))}
             </>
@@ -249,6 +259,7 @@ export default function HomeScreen() {
                 followUp={f}
                 currentUserId={profile.id}
                 onAssign={() => assignFollowUp(f.id)}
+                onPress={() => router.push({ pathname: '/follow-ups/[id]', params: { id: f.id } })}
               />
             ))
           ) : (

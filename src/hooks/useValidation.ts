@@ -135,6 +135,7 @@ export function useCreateFollowUp() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['home'] });
       void queryClient.invalidateQueries({ queryKey: ['follow-ups'] });
+      void queryClient.invalidateQueries({ queryKey: ['change'] });
     },
   });
 }

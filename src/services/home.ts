@@ -3,6 +3,7 @@ import type { Enums, Tables } from '@/types/database';
 import { overlaps } from '@/utils/home';
 import { shiftDurationHours } from '@/utils/shiftKind';
 
+import { listFollowUps, type FollowUpItem } from './followUps';
 import { getOpenShift, type Shift } from './shifts';
 
 const HOUR = 3_600_000;
@@ -28,18 +29,7 @@ export type UnansweredCall = {
   appName: string | null;
 };
 
-export type HomeFollowUp = {
-  id: string;
-  title: string;
-  status: Enums<'follow_up_status'>;
-  assignedTo: string | null;
-  assigneeName: string | null;
-  createdAt: string;
-  appShortName: string | null;
-  sourceLabel: string | null;
-  shiftKind: Enums<'shift_kind'> | null;
-  shiftStartedAt: string | null;
-};
+export type HomeFollowUp = FollowUpItem;
 
 export type HomeData = {
   shift: Shift | null;
@@ -66,7 +56,7 @@ export async function getHomeData(userId: string): Promise<HomeData> {
   const shift = await getOpenShift(userId);
   const win = computeWindow(shift, now);
 
-  const [changesRes, callsRes, followRes, incidentsRes] = await Promise.all([
+  const [changesRes, callsRes, followUps, incidentsRes] = await Promise.all([
     supabase
       .from('changes')
       .select('*, change_applications(applications(id, name, short_name))')
@@ -83,13 +73,7 @@ export async function getHomeData(userId: string): Promise<HomeData> {
       .is('responded_at', null)
       .neq('incidents.status', 'resolvida')
       .order('created_at'),
-    supabase
-      .from('follow_ups')
-      .select(
-        'id, title, status, assigned_to, created_at, source_type, source_id, applications(short_name), shifts(kind, started_at), assignee:profiles!follow_ups_assigned_to_fkey(full_name)',
-      )
-      .neq('status', 'concluida')
-      .order('created_at'),
+    listFollowUps({ includeDone: false }),
     supabase
       .from('incidents')
       .select('id', { count: 'exact', head: true })
@@ -98,7 +82,6 @@ export async function getHomeData(userId: string): Promise<HomeData> {
 
   if (changesRes.error) throw new Error(`Erro ao carregar GMUDs: ${changesRes.error.message}`);
   if (callsRes.error) throw new Error(`Erro ao carregar acionamentos: ${callsRes.error.message}`);
-  if (followRes.error) throw new Error(`Erro ao carregar pendências: ${followRes.error.message}`);
   if (incidentsRes.error)
     throw new Error(`Erro ao carregar ocorrências: ${incidentsRes.error.message}`);
 
@@ -146,20 +129,6 @@ export async function getHomeData(userId: string): Promise<HomeData> {
       }),
   }));
 
-  // Change numbers for follow-ups that came from a change.
-  const sourceChangeIds = followRes.data
-    .filter((f) => f.source_type === 'change' && f.source_id)
-    .map((f) => f.source_id as string);
-  const numbers = new Map<string, string>();
-  if (sourceChangeIds.length) {
-    const { data, error } = await supabase
-      .from('changes')
-      .select('id, change_number')
-      .in('id', sourceChangeIds);
-    if (error) throw new Error(`Erro ao carregar origem das pendências: ${error.message}`);
-    data.forEach((c) => numbers.set(c.id, c.change_number));
-  }
-
   return {
     shift,
     window: { start: win.start.toISOString(), end: win.end.toISOString() },
@@ -173,18 +142,8 @@ export async function getHomeData(userId: string): Promise<HomeData> {
       ticket: e.incidents.external_ticket,
       appName: e.incidents.applications?.name ?? null,
     })),
-    followUps: followRes.data.map((f) => ({
-      id: f.id,
-      title: f.title,
-      status: f.status,
-      assignedTo: f.assigned_to,
-      assigneeName: f.assignee?.full_name ?? null,
-      createdAt: f.created_at,
-      appShortName: f.applications?.short_name ?? null,
-      sourceLabel: f.source_id ? (numbers.get(f.source_id) ?? null) : null,
-      shiftKind: f.shifts?.kind ?? null,
-      shiftStartedAt: f.shifts?.started_at ?? null,
-    })),
+    // Oldest first: what has been waiting the longest shows on top.
+    followUps: [...followUps].reverse(),
     openIncidents: incidentsRes.count ?? 0,
   };
 }

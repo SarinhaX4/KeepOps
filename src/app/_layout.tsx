@@ -19,6 +19,10 @@ const headerScreens: [string, string][] = [
   ['changes/[id]/validate/[appId]', 'Validação'],
   ['changes/[id]/conclude', 'Concluir GMUD'],
   ['applications/index', 'Aplicações'],
+  ['incidents/new', 'Nova ocorrência'],
+  ['incidents/[id]', 'Ocorrência'],
+  ['follow-ups/new', 'Nova pendência'],
+  ['follow-ups/[id]', 'Pendência'],
 ];
 
 // Keep the splash visible until fonts and the stored session are ready.

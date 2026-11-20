@@ -1,14 +1,15 @@
-import { UserCheck, UserPlus } from 'lucide-react-native';
+import { CircleCheck, UserCheck, UserPlus } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/ui/Card';
-import type { HomeFollowUp } from '@/services/home';
+import type { FollowUpItem } from '@/services/followUps';
 import { colors, fonts, hitTarget, radius, spacing } from '@/theme';
+import { formatRelative } from '@/utils/format';
 import { shiftKindLabel } from '@/utils/shiftKind';
 
 const DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const;
 
-function originLabel(f: HomeFollowUp): string {
+function originLabel(f: FollowUpItem): string {
   const parts: string[] = [];
   if (f.sourceLabel) parts.push(f.sourceLabel);
   else if (f.appShortName) parts.push(f.appShortName);
@@ -20,26 +21,47 @@ function originLabel(f: HomeFollowUp): string {
 }
 
 type Props = {
-  followUp: HomeFollowUp;
+  followUp: FollowUpItem;
   currentUserId: string;
   onAssign: () => void;
+  /** Opens the follow-up detail. */
+  onPress?: () => void;
+  /** Show the age ("há 2 d") — used on the Pendências tab. */
+  showAge?: boolean;
 };
 
-export function FollowUpRow({ followUp, currentUserId, onAssign }: Props) {
+export function FollowUpRow({
+  followUp,
+  currentUserId,
+  onAssign,
+  onPress,
+  showAge = false,
+}: Props) {
   const mine = followUp.assignedTo === currentUserId;
+  const done = followUp.status === 'concluida';
   const other = followUp.assignedTo !== null && !mine;
   const origin = originLabel(followUp);
 
   return (
-    <Card style={styles.row}>
+    <Card style={styles.row} onPress={onPress} accessibilityLabel={`Pendência: ${followUp.title}`}>
       <View style={styles.flex}>
         <Text style={styles.title}>{followUp.title}</Text>
         {origin ? <Text style={styles.meta}>{origin}</Text> : null}
-        {other && followUp.assigneeName ? (
+        {other && followUp.assigneeName && !done ? (
           <Text style={styles.assignee}>Com {followUp.assigneeName}</Text>
         ) : null}
+        {done && followUp.resolverName ? (
+          <Text style={styles.resolved}>Concluída por {followUp.resolverName}</Text>
+        ) : null}
+        {showAge && !done ? (
+          <Text style={styles.age}>Aberta {formatRelative(followUp.createdAt)}</Text>
+        ) : null}
       </View>
-      {mine ? (
+      {done ? (
+        <View style={styles.done} accessibilityLabel="Pendência concluída">
+          <CircleCheck size={16} color={colors.okText} strokeWidth={2} />
+        </View>
+      ) : mine ? (
         <View style={styles.mine} accessibilityLabel="Pendência com você">
           <UserCheck size={16} color={colors.okText} strokeWidth={2} />
           <Text style={styles.mineText}>Com você</Text>
@@ -86,5 +108,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.control,
     backgroundColor: colors.okSoft,
   },
+  resolved: { fontFamily: fonts.medium, fontSize: 12, color: colors.okText },
+  age: { fontFamily: fonts.regular, fontSize: 12, color: colors.dim },
+  done: { width: hitTarget, height: hitTarget, alignItems: 'center', justifyContent: 'center' },
   mineText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.okText },
 });

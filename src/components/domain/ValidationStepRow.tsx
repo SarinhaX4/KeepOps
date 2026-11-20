@@ -1,4 +1,4 @@
-import { ListPlus } from 'lucide-react-native';
+import { ListPlus, Siren } from 'lucide-react-native';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -20,6 +20,7 @@ type Props = {
   onResult: (result: ValidationResult) => void;
   onNote: (note: string) => void;
   onCreateFollowUp: () => void;
+  onOpenIncident: () => void;
 };
 
 export function ValidationStepRow({
@@ -29,6 +30,7 @@ export function ValidationStepRow({
   onResult,
   onNote,
   onCreateFollowUp,
+  onOpenIncident,
 }: Props) {
   const [note, setNote] = useState(step.note ?? '');
   const needsDetail = step.result === 'reprovado' || step.result === 'na';
@@ -69,12 +71,26 @@ export function ValidationStepRow({
             style={styles.note}
           />
           {editable ? (
-            <Button
-              label="Criar pendência"
-              icon={ListPlus}
-              variant="secondary"
-              onPress={onCreateFollowUp}
-            />
+            <View style={styles.actions}>
+              {step.result === 'reprovado' ? (
+                <View style={styles.flex}>
+                  <Button
+                    label="Abrir ocorrência"
+                    icon={Siren}
+                    variant="danger"
+                    onPress={onOpenIncident}
+                  />
+                </View>
+              ) : null}
+              <View style={styles.flex}>
+                <Button
+                  label="Criar pendência"
+                  icon={ListPlus}
+                  variant="secondary"
+                  onPress={onCreateFollowUp}
+                />
+              </View>
+            </View>
           ) : null}
         </View>
       ) : null}
@@ -90,6 +106,8 @@ const styles = StyleSheet.create({
   title: { flex: 1, fontFamily: fonts.medium, fontSize: 15, color: colors.text },
   author: { fontFamily: fonts.mono, fontSize: 12, color: colors.muted },
   detail: { gap: spacing.sm },
+  actions: { flexDirection: 'row', gap: spacing.sm },
+  flex: { flex: 1 },
   note: {
     minHeight: 64,
     textAlignVertical: 'top',

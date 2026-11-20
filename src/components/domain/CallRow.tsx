@@ -7,12 +7,24 @@ import { colors, fonts, radius, spacing } from '@/theme';
 import { formatMinutes, minutesSince } from '@/utils/format';
 
 /** Executor call still waiting for an answer (amber = attention). */
-export function CallRow({ call, now }: { call: UnansweredCall; now: Date }) {
+export function CallRow({
+  call,
+  now,
+  onPress,
+}: {
+  call: UnansweredCall;
+  now: Date;
+  onPress: () => void;
+}) {
   const elapsed = formatMinutes(minutesSince(call.createdAt, now));
   const who = [call.contact, call.channel?.toLowerCase()].filter(Boolean).join(' · ');
   const ref = [call.ticket, call.appName].filter(Boolean).join(' · ');
   return (
-    <Card style={styles.row}>
+    <Card
+      style={styles.row}
+      onPress={onPress}
+      accessibilityLabel={`Acionamento sem resposta: ${call.contact ?? ''}`}
+    >
       <View style={styles.icon}>
         <PhoneCall size={18} color={colors.warnText} strokeWidth={1.8} />
       </View>

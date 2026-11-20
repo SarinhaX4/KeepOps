@@ -69,7 +69,11 @@ export function useAssignFollowUp() {
     onError: (_err, _id, context) => {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['home'] }),
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['home'] }),
+        queryClient.invalidateQueries({ queryKey: ['follow-ups'] }),
+      ]),
   });
 }
 

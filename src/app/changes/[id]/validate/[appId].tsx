@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -192,6 +192,19 @@ export default function ValidateAppScreen() {
                   )
                 }
                 onCreateFollowUp={() => followUpFor(s.id, s.step_title, s.note)}
+                onOpenIncident={() =>
+                  router.push({
+                    pathname: '/incidents/new',
+                    params: {
+                      changeId: data.id,
+                      changeNumber: data.change_number,
+                      appId: app.id,
+                      validationId: s.id,
+                      title: `${app.name}: falha em "${s.step_title}"`,
+                      note: s.note ?? '',
+                    },
+                  })
+                }
               />
             ))}
           </>
