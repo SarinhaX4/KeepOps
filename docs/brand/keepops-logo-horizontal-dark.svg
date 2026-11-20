@@ -14,7 +14,7 @@
     </g>
   <g font-family="Geist, Inter, Arial, sans-serif">
     <text x="260" y="126" font-size="91" font-weight="700" letter-spacing="-3" fill="#EDEFEE">Keep</text>
-    <text x="470" y="126" font-size="91" font-weight="700" letter-spacing="-3" fill="#22C3EE">Ops</text>
+    <text x="470" y="126" font-size="91" font-weight="700" letter-spacing="-3" fill="#10BFA5">Ops</text>
     <text x="263" y="171" font-size="23" font-weight="400" letter-spacing="0.3" fill="#EDEFEE">Keep the context.</text>
     <text x="471" y="171" font-size="23" font-weight="400" letter-spacing="0.3" fill="#10BFA5">Keep operations moving.</text>
   </g>

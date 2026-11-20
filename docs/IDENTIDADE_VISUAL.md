@@ -483,3 +483,6 @@ Feedback: as cores da interface "brigavam" com a logo. Toda a paleta do tema esc
 | texto do botão primário | `#042B26` | `#03241F` (7,1:1 sobre o aqua) |
 
 Mantidos: aqua `#10BFA5` e ciano `#22C3EE` (marca), âmbar `#F59E0B` (atenção) e rosa-vermelho `#F43F5E` (falha). Ícone, splash e fundo do app usam `#040607`.
+
+### Wordmark (20/11/2026)
+`Ops` passa de ciano `#22C3EE` para **aqua `#10BFA5`** — o ciano "puxava para o azul" e quebrava o resto da interface. Aplicado no cabeçalho do app (texto), nos PNGs `keepops-logo-horizontal-dark` e `keepops-logo-stacked-dark` e nos SVGs master. O símbolo K mantém o degradê aqua → ciano original.

@@ -22,5 +22,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   symbol: { width: 30, height: 30 },
   wordmark: { fontFamily: fonts.bold, fontSize: 20, color: colors.text, letterSpacing: -0.4 },
-  ops: { color: colors.brandSecondary },
+  // "Ops" in aqua (adjusted 20/11): cyan read too blue against the rest of the UI.
+  ops: { color: colors.brandPrimary },
 });

@@ -13,7 +13,7 @@
       <circle cx="184" cy="150" r="13" stroke="#22C3EE" stroke-width="8" fill="#0B0F11"/>
     </g>
   <g font-family="Geist, Inter, Arial, sans-serif" text-anchor="middle">
-    <text x="310" y="278" font-size="78" font-weight="700" letter-spacing="-2.5" fill="#EDEFEE">Keep<tspan fill="#22C3EE">Ops</tspan></text>
+    <text x="310" y="278" font-size="78" font-weight="700" letter-spacing="-2.5" fill="#EDEFEE">Keep<tspan fill="#10BFA5">Ops</tspan></text>
     <text x="310" y="320" font-size="19" font-weight="400" letter-spacing="0.25" fill="#EDEFEE">Keep the context. <tspan fill="#10BFA5">Keep operations moving.</tspan></text>
   </g>
     </svg>
