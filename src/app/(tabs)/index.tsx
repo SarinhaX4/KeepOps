@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { CircleCheck, Layers } from 'lucide-react-native';
+import { ArrowRightLeft, CircleCheck, Layers } from 'lucide-react-native';
 import { Alert, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { BrandHeader } from '@/components/domain/BrandHeader';
@@ -17,11 +17,13 @@ import { ErrorState, Skeleton } from '@/components/ui/StateViews';
 import { useAssignFollowUp, useHome, useStartShift } from '@/hooks/useHome';
 import { useNow } from '@/hooks/useNow';
 import { useProfile } from '@/hooks/useProfile';
+import { usePendingHandover } from '@/hooks/useShifts';
 import { signOut } from '@/services/auth';
 import { colors, fonts, spacing, typography } from '@/theme';
 import { formatLongDate, formatTime, greeting } from '@/utils/format';
 import { countWindow, counterStatuses, type WindowCounters } from '@/utils/home';
 import { shiftKindLabel, suggestShiftKind, type ShiftKind } from '@/utils/shiftKind';
+import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 
 function confirmSignOut() {
   Alert.alert('Sair da conta?', 'Você poderá entrar novamente com outro usuário demo.', [
@@ -46,6 +48,8 @@ export default function HomeScreen() {
   const now = useNow(60_000);
   const { data: profile } = useProfile();
   const home = useHome();
+  const pendingHandover = usePendingHandover();
+  useRefreshOnFocus(() => Promise.all([home.refetch(), pendingHandover.refetch()]));
   const startShift = useStartShift();
   const assign = useAssignFollowUp();
 
@@ -89,7 +93,10 @@ export default function HomeScreen() {
       refreshControl={
         <RefreshControl
           refreshing={home.isRefetching}
-          onRefresh={() => void home.refetch()}
+          onRefresh={() => {
+            void home.refetch();
+            void pendingHandover.refetch();
+          }}
           tintColor={colors.brandPrimary}
           colors={[colors.brandPrimary]}
         />
@@ -134,8 +141,36 @@ export default function HomeScreen() {
         <ErrorState message={home.error.message} onRetry={() => void home.refetch()} />
       ) : data && counters && profile ? (
         <>
+          {pendingHandover.data && isOnCall ? (
+            <Card
+              style={styles.banner}
+              onPress={() =>
+                router.push({
+                  pathname: '/shifts/[id]',
+                  params: { id: pendingHandover.data?.id as string },
+                })
+              }
+              accessibilityLabel="Passagem aguardando seu recebimento"
+            >
+              <ArrowRightLeft size={18} color={colors.warnText} strokeWidth={1.9} />
+              <View style={styles.flex}>
+                <Text style={styles.bannerTitle}>Passagem aguardando seu recebimento</Text>
+                <Text style={styles.bannerMeta}>
+                  De {pendingHandover.data.authorName ?? 'outro plantonista'} · toque para ler e
+                  confirmar
+                </Text>
+              </View>
+            </Card>
+          ) : null}
+
           {data.shift ? (
-            <OpenShiftCard shift={data.shift} />
+            <Card
+              style={styles.shiftLink}
+              onPress={() => router.push('/shifts')}
+              accessibilityLabel="Abrir turno e passagem"
+            >
+              <OpenShiftCard shift={data.shift} />
+            </Card>
           ) : isOnCall ? (
             <StartShiftCard
               suggested={suggestShiftKind(now)}
@@ -283,6 +318,17 @@ const styles = StyleSheet.create({
   mono: { fontFamily: fonts.mono, fontSize: 13, color: colors.muted },
   grid: { gap: spacing.md },
   gridRow: { flexDirection: 'row', gap: spacing.md },
+  flex: { flex: 1 },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderColor: colors.warn,
+    backgroundColor: colors.warnSoft,
+  },
+  bannerTitle: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text },
+  bannerMeta: { ...typography.meta, color: colors.muted },
+  shiftLink: { padding: 0, borderWidth: 0 },
   allClear: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   allClearText: { ...typography.bodySmall, color: colors.muted },
 });

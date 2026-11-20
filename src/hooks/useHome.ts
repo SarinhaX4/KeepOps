@@ -31,6 +31,7 @@ export function useStartShift() {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ['home'] }),
         queryClient.invalidateQueries({ queryKey: ['shift'] }),
+        queryClient.invalidateQueries({ queryKey: ['handover'] }),
       ]),
   });
 }

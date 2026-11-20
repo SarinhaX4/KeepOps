@@ -23,6 +23,7 @@ const headerScreens: [string, string][] = [
   ['incidents/[id]', 'Ocorrência'],
   ['follow-ups/new', 'Nova pendência'],
   ['follow-ups/[id]', 'Pendência'],
+  ['shifts/[id]', 'Passagem de plantão'],
 ];
 
 // Keep the splash visible until fonts and the stored session are ready.

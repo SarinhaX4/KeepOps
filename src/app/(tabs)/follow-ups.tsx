@@ -13,11 +13,13 @@ import { useProfile } from '@/hooks/useProfile';
 import type { FollowUpItem } from '@/services/followUps';
 import { toast } from '@/store/toast';
 import { colors, spacing, typography } from '@/theme';
+import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 
 type Tab = 'mine' | 'unassigned' | 'all' | 'done';
 
 export default function FollowUpsScreen() {
   const list = useFollowUps();
+  useRefreshOnFocus(list.refetch);
   const assign = useAssignFromList();
   const { data: profile } = useProfile();
   const [tab, setTab] = useState<Tab>('mine');

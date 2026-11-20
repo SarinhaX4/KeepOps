@@ -11,6 +11,7 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/ui/StateViews';
 import { useIncidents } from '@/hooks/useIncidents';
 import type { IncidentListItem as Incident } from '@/services/incidents';
 import { colors, spacing, typography } from '@/theme';
+import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 
 type Filter = 'open' | 'resolved' | 'all';
 const filters: { key: Filter; label: string; test: (i: Incident) => boolean }[] = [
@@ -21,6 +22,7 @@ const filters: { key: Filter; label: string; test: (i: Incident) => boolean }[] 
 
 export default function IncidentsScreen() {
   const incidents = useIncidents();
+  useRefreshOnFocus(incidents.refetch);
   const [filter, setFilter] = useState<Filter>('open');
   const active = filters.find((f) => f.key === filter) ?? filters[0];
   const items = incidents.data?.filter(active.test) ?? [];

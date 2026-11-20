@@ -22,9 +22,11 @@ import { useChanges } from '@/hooks/useChanges';
 import type { ChangeStatus } from '@/services/changes';
 import { colors, fonts, hitTarget, radius, spacing, typography } from '@/theme';
 import { changeFilters, filterChanges, type ChangeFilterKey } from '@/utils/changeFilters';
+import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 
 export default function ChangesScreen() {
   const { data, isPending, isError, error, refetch, isRefetching } = useChanges();
+  useRefreshOnFocus(refetch);
   const { status } = useLocalSearchParams<{ status?: string }>();
   const [filter, setFilter] = useState<ChangeFilterKey>('all');
   const [query, setQuery] = useState('');
