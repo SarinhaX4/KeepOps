@@ -26,6 +26,11 @@ Expo SDK 58 · React Native · TypeScript (strict) · Expo Router · Supabase (P
 
 Senha de todos: `KeepOps#Demo2026` (ambiente demonstrativo).
 
+### Windows
+O Jest 30 usa um resolvedor nativo (`unrs-resolver`) que depende do **Microsoft Visual C++ Redistributable (x64)**.
+Em um Windows recém-instalado, `npm test` falha com *"Preset jest-expo not found"*. Instale o runtime:
+`winget install Microsoft.VCRedist.2015+.x64` (ou baixe em https://aka.ms/vs/17/release/vc_redist.x64.exe).
+
 ## Scripts
 - `npm run check` — typecheck + lint + testes
 - `npm test` — testes unitários (Jest)
